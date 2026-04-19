@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateProfile } from "@/app/actions/users";
 import { uploadFile } from "@/app/actions/upload";
 import { Camera, CheckCircle } from "lucide-react";
+import { toast } from "@/components/ui/toast";
 import { BackButton } from "@/components/layout/back-button";
 
 interface EditFormProps {
@@ -32,11 +33,20 @@ export function EditForm({ user }: EditFormProps) {
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.warning("File too large", "File exceeds the 10MB limit. Please upload a smaller file.");
+      return;
+    }
     startUpload(async () => {
       const fd = new FormData();
       fd.set("file", file);
       const result = await uploadFile(fd);
-      if (result.url) setAvatarUrl(result.url);
+      if (result.url) {
+        setAvatarUrl(result.url);
+      } else if (result.error) {
+        toast.error("Upload failed", result.error);
+      }
     });
   };
 

@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
-import type { SessionData } from "@/lib/auth/session";
 
-const protectedRoutes = ["/create", "/profile/edit"];
+interface SessionData {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  isLoggedIn: boolean;
+  isAdmin?: boolean;
+  isSuspended?: boolean;
+}
+
+const protectedRoutes = ["/create", "/profile/edit", "/saved", "/admin"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -21,15 +30,20 @@ export async function proxy(request: NextRequest) {
     cookieName: "uninews-session",
   });
 
-  if (!session.isLoggedIn) {
+  if (!session.isLoggedIn || session.isSuspended) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Admin protection
+  if (pathname.startsWith("/admin") && !session.isAdmin) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/create/:path*", "/profile/edit/:path*"],
+  matcher: ["/create/:path*", "/profile/edit/:path*", "/saved/:path*", "/admin/:path*"],
 };

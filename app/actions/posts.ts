@@ -14,6 +14,8 @@ import { getRankedPosts } from "@/lib/feed/ranking";
 import { eq, and, desc, sql, count } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import DOMPurify from "isomorphic-dompurify";
+import { stripHtml } from "@/lib/utils";
 
 const PostSchema = z.object({
   title: z.string().min(1, "Title required").max(200),
@@ -29,9 +31,7 @@ export type PostState = {
   fieldErrors?: Record<string, string[]>;
 } | null;
 
-function stripHtml(html: string) {
-  return html.replace(/<[^>]*>?/gm, "");
-}
+
 
 export async function createPost(
   _prevState: PostState,
@@ -62,15 +62,21 @@ export async function createPost(
   const mediaUrlsRaw = formData.get("mediaUrls") as string;
   const mediaUrls = mediaUrlsRaw ? JSON.parse(mediaUrlsRaw) : null;
 
+  // Sanitize HTML content to prevent XSS
+  const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+
   const [post] = await db
     .insert(posts)
     .values({
       authorId: user.userId,
       title: parsed.data.title,
-      content: parsed.data.content,
+      content: sanitizedContent,
       excerpt:
         parsed.data.excerpt ||
-        stripHtml(parsed.data.content).substring(0, 300) + "...",
+        stripHtml(sanitizedContent).substring(0, 300) + "...",
       category: parsed.data.category,
       tags: tagsArray,
       coverImageUrl: parsed.data.coverImageUrl || null,
@@ -121,12 +127,18 @@ export async function updatePost(
   const mediaUrlsRaw = formData.get("mediaUrls") as string;
   const mediaUrls = mediaUrlsRaw ? JSON.parse(mediaUrlsRaw) : existing.mediaUrls;
 
+  // Sanitize HTML content to prevent XSS
+  const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+
   await db
     .update(posts)
     .set({
       title: parsed.data.title,
-      content: parsed.data.content,
-      excerpt: parsed.data.excerpt || stripHtml(parsed.data.content).substring(0, 300),
+      content: sanitizedContent,
+      excerpt: parsed.data.excerpt || stripHtml(sanitizedContent).substring(0, 300),
       category: parsed.data.category,
       tags: tagsArray,
       coverImageUrl: parsed.data.coverImageUrl || existing.coverImageUrl,
@@ -314,3 +326,64 @@ export async function getPostWithEngagement(postId: string) {
 export async function getRankedFeed(offset: number) {
   return await getRankedPosts(10, offset);
 }
+
+export async function searchPosts(query: string, category?: string, limit = 30) {
+  let conditions = and(
+    eq(posts.isPublished, true),
+    eq(posts.isFlagged, false),
+    sql`(${posts.title} ILIKE ${'%' + query + '%'} OR ${posts.content} ILIKE ${'%' + query + '%'})`
+  );
+
+  if (category && category !== "all") {
+    conditions = and(conditions, eq(posts.category, category));
+  }
+
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      content: posts.content,
+      excerpt: posts.excerpt,
+      coverImageUrl: posts.coverImageUrl,
+      mediaUrls: posts.mediaUrls,
+      category: posts.category,
+      tags: posts.tags,
+      viewCount: posts.viewCount,
+      createdAt: posts.createdAt,
+      editedAt: posts.editedAt,
+      authorId: users.id,
+      authorUsername: users.username,
+      authorDisplayName: users.displayName,
+      authorAvatarUrl: users.avatarUrl,
+    })
+    .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(conditions)
+    .orderBy(desc(posts.createdAt))
+    .limit(limit);
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    content: row.content,
+    excerpt: row.excerpt,
+    coverImageUrl: row.coverImageUrl,
+    mediaUrls: row.mediaUrls,
+    category: row.category,
+    tags: row.tags,
+    viewCount: row.viewCount,
+    createdAt: row.createdAt,
+    editedAt: row.editedAt,
+    author: {
+      id: row.authorId,
+      username: row.authorUsername,
+      displayName: row.authorDisplayName,
+      avatarUrl: row.authorAvatarUrl,
+    },
+    likeCount: 0,
+    saveCount: 0,
+    repostCount: 0,
+    score: 0,
+  }));
+}
+

@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { users, follows, posts } from "@/lib/db/schema";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, getSession } from "@/lib/auth/session";
 import { eq, and, count, desc } from "drizzle-orm";
 
 export async function toggleFollow(targetUserId: string) {
@@ -122,6 +122,12 @@ export async function updateProfile(formData: FormData) {
     })
     .where(eq(users.id, user.userId));
 
+  // Refresh session so navbar/avatar stay in sync
+  const session = await getSession();
+  if (displayName) session.displayName = displayName;
+  if (avatarUrl) session.avatarUrl = avatarUrl;
+  await session.save();
+
   return { success: true };
 }
 
@@ -147,27 +153,21 @@ export async function getFollowers(username: string) {
     .where(eq(follows.followingId, targetUser.id));
 
   const currentUser = await getCurrentUser();
-  const results = await Promise.all(
-    followerRecords.map(async (u) => {
-      let isFollowing = false;
-      if (currentUser) {
-        const [f] = await db
-          .select()
-          .from(follows)
-          .where(
-            and(
-              eq(follows.followerId, currentUser.userId),
-              eq(follows.followingId, u.id)
-            )
-          )
-          .limit(1);
-        isFollowing = !!f;
-      }
-      return { ...u, isFollowing };
-    })
-  );
 
-  return results;
+  // Batch-fetch which of these users the current user follows (1 query instead of N)
+  let followingSet = new Set<string>();
+  if (currentUser && followerRecords.length > 0) {
+    const currentFollows = await db
+      .select({ followingId: follows.followingId })
+      .from(follows)
+      .where(eq(follows.followerId, currentUser.userId));
+    followingSet = new Set(currentFollows.map((f) => f.followingId));
+  }
+
+  return followerRecords.map((u) => ({
+    ...u,
+    isFollowing: followingSet.has(u.id),
+  }));
 }
 
 export async function getFollowing(username: string) {
@@ -192,25 +192,20 @@ export async function getFollowing(username: string) {
     .where(eq(follows.followerId, targetUser.id));
 
   const currentUser = await getCurrentUser();
-  const results = await Promise.all(
-    followingRecords.map(async (u) => {
-      let isFollowing = false;
-      if (currentUser) {
-        const [f] = await db
-          .select()
-          .from(follows)
-          .where(
-            and(
-              eq(follows.followerId, currentUser.userId),
-              eq(follows.followingId, u.id)
-            )
-          )
-          .limit(1);
-        isFollowing = !!f;
-      }
-      return { ...u, isFollowing };
-    })
-  );
 
-  return results;
+  // Batch-fetch which of these users the current user follows (1 query instead of N)
+  let followingSet = new Set<string>();
+  if (currentUser && followingRecords.length > 0) {
+    const currentFollows = await db
+      .select({ followingId: follows.followingId })
+      .from(follows)
+      .where(eq(follows.followerId, currentUser.userId));
+    followingSet = new Set(currentFollows.map((f) => f.followingId));
+  }
+
+  return followingRecords.map((u) => ({
+    ...u,
+    isFollowing: followingSet.has(u.id),
+  }));
 }
+

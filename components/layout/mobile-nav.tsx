@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Search, PenLine, User, KeyRound, UserPlus } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Home, Search, PenLine, User, KeyRound, UserPlus, Bookmark } from "lucide-react";
 
 interface NavUser {
   userId: string;
@@ -9,6 +10,8 @@ interface NavUser {
 }
 
 export function MobileNav({ user }: { user: NavUser | null }) {
+  const pathname = usePathname();
+
   return (
     <>
       <nav
@@ -35,21 +38,23 @@ export function MobileNav({ user }: { user: NavUser | null }) {
             margin: "0 auto",
           }}
         >
-          <NavItem href="/" icon={<Home />} label="Home" />
-          <NavItem href="/explore" icon={<Search />} label="Explore" />
+          <NavItem href="/" icon={<Home />} label="Home" active={pathname === "/"} />
+          <NavItem href="/explore" icon={<Search />} label="Explore" active={pathname.startsWith("/explore")} />
           {user ? (
             <>
               <NavItem href="/create" icon={<PenLine />} label="Post" accent />
+              <NavItem href="/saved" icon={<Bookmark />} label="Saved" active={pathname === "/saved"} />
               <NavItem
                 href={`/profile/${user.username}`}
                 icon={<User />}
                 label="Profile"
+                active={pathname.startsWith("/profile")}
               />
             </>
           ) : (
             <>
-              <NavItem href="/login" icon={<KeyRound />} label="Login" />
-              <NavItem href="/signup" icon={<UserPlus />} label="Sign up" />
+              <NavItem href="/login" icon={<KeyRound />} label="Login" active={pathname === "/login"} />
+              <NavItem href="/signup" icon={<UserPlus />} label="Sign up" active={pathname === "/signup"} />
             </>
           )}
         </div>
@@ -70,11 +75,13 @@ function NavItem({
   icon,
   label,
   accent,
+  active,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   accent?: boolean;
+  active?: boolean;
 }) {
   return (
     <Link
@@ -89,9 +96,11 @@ function NavItem({
         padding: "0.25rem 0.75rem",
         borderRadius: "var(--radius-md)",
         transition: "all 0.2s",
+        color: active ? "var(--accent)" : undefined,
         ...(accent
           ? {
               background: "var(--accent)",
+              color: "white",
               borderRadius: "50%",
               width: 48,
               height: 48,
@@ -107,8 +116,8 @@ function NavItem({
         <span
           style={{
             fontSize: "0.625rem",
-            fontWeight: 500,
-            color: "var(--text-tertiary)",
+            fontWeight: active ? 700 : 500,
+            color: active ? "var(--accent)" : "var(--text-tertiary)",
           }}
         >
           {label}

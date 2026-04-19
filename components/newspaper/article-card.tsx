@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { RankedPost } from "@/lib/feed/ranking";
 import { Eye, Heart, Repeat2 } from "lucide-react";
+import { timeAgo, getCategoryClass, stripHtml } from "@/lib/utils";
 
 type CardSize = "hero" | "large" | "medium" | "compact";
 
@@ -8,34 +9,6 @@ interface ArticleCardProps {
   post: RankedPost;
   size?: CardSize;
   showImage?: boolean;
-}
-
-function timeAgo(date: Date): string {
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function getCategoryClass(category: string): string {
-  const map: Record<string, string> = {
-    campus: "badge-campus",
-    academic: "badge-academic",
-    sports: "badge-sports",
-    events: "badge-events",
-    opinion: "badge-opinion",
-    clubs: "badge-clubs",
-  };
-  return map[category] || "";
-}
-
-function stripHtml(html: string) {
-  return html.replace(/<[^>]*>?/gm, "");
 }
 
 export function ArticleCard({

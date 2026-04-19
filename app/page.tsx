@@ -4,8 +4,12 @@ import { getRankedPosts } from "@/lib/feed/ranking";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { Unplug } from "lucide-react";
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
 export default async function HomePage() {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
   let posts: Awaited<ReturnType<typeof getRankedPosts>> = [];
   let dbError = false;
 

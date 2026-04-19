@@ -983,8 +983,8 @@ textarea.input {
   font-size: 0.875rem;
   color: var(--text-secondary);
   display: -webkit-box;
-  WebkitLineClamp: 1;
-  WebkitBoxOrient: vertical;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
@@ -1075,4 +1075,20 @@ textarea.input {
 .btn-back:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+/* ─── Toast System ──────────────────────────────────────────────── */
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

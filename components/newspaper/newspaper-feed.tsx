@@ -6,17 +6,12 @@ import { getRankedFeed } from "@/app/actions/posts";
 import type { RankedPost } from "@/lib/feed/ranking";
 import { PretextArticle } from "./pretext-article";
 import { prepare, layout } from "@chenglou/pretext";
+import { stripHtml } from "@/lib/utils";
 
 // Configuration for the broadsheet grid
 const ROW_HEIGHT = 5; // 5px row slices for fine-grained packing
 const GAP_PX = 40; // 2.5rem
 const COL_COUNT = 12;
-
-function stripHtml(html: string) {
-  if (typeof window === "undefined") return html;
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return doc.body.textContent || "";
-}
 
 // Helper component for each article to auto-correct its height perfectly.
 function FeedArticle({ post }: { post: any }) {

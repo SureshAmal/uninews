@@ -23,6 +23,8 @@ export const users = pgTable("users", {
   collegeYears: integer("college_years"),
   registrationNo: varchar("registration_no", { length: 50 }),
   enrollmentNo: varchar("enrollment_no", { length: 50 }),
+  isAdmin: boolean("is_admin").default(false).notNull(),
+  isSuspended: boolean("is_suspended").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -156,9 +158,30 @@ export const postViews = pgTable(
   (table) => [index("post_views_post_idx").on(table.postId, table.viewedAt)]
 );
 
+// ─── Comments ────────────────────────────────────────────────────
+export const comments = pgTable(
+  "comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    postId: uuid("post_id")
+      .references(() => posts.id, { onDelete: "cascade" })
+      .notNull(),
+    authorId: uuid("author_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull(),
+    parentId: uuid("parent_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("comments_post_idx").on(table.postId, table.createdAt),
+  ]
+);
+
 // ─── Type exports ────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
+export type Comment = typeof comments.$inferSelect;

@@ -80,6 +80,8 @@ export async function signup(
   session.username = newUser.username;
   session.displayName = newUser.displayName;
   session.avatarUrl = newUser.avatarUrl;
+  session.isAdmin = newUser.isAdmin;
+  session.isSuspended = newUser.isSuspended;
   session.isLoggedIn = true;
   await session.save();
 
@@ -94,6 +96,7 @@ export async function login(
     username: formData.get("username") as string,
     password: formData.get("password") as string,
   };
+  const redirectTo = (formData.get("redirectTo") as string) || "/";
 
   const parsed = LoginSchema.safeParse(raw);
   if (!parsed.success) {
@@ -110,6 +113,10 @@ export async function login(
     return { error: "Invalid username or password" };
   }
 
+  if (user.isSuspended) {
+    return { error: "Your account has been suspended by an administrator." };
+  }
+
   const valid = await verifyPassword(parsed.data.password, user.passwordHash);
   if (!valid) {
     return { error: "Invalid username or password" };
@@ -120,10 +127,12 @@ export async function login(
   session.username = user.username;
   session.displayName = user.displayName;
   session.avatarUrl = user.avatarUrl;
+  session.isAdmin = user.isAdmin;
+  session.isSuspended = user.isSuspended;
   session.isLoggedIn = true;
   await session.save();
 
-  redirect("/");
+  redirect(redirectTo.startsWith("/") ? redirectTo : "/");
 }
 
 export async function logout() {

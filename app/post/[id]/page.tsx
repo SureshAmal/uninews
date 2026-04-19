@@ -2,22 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPostWithEngagement, recordView } from "@/app/actions/posts";
 import { getPostReviews } from "@/app/actions/reviews";
+import { getComments } from "@/app/actions/comments";
 import { getCurrentUser } from "@/lib/auth/session";
 import { EngagementBar } from "@/components/post/engagement-bar";
 import { ReviewSection } from "@/components/post/review-section";
+import { CommentSection } from "@/components/post/comment-section";
 import { Pencil } from "lucide-react";
 import { BackButton } from "@/components/layout/back-button";
-function getCategoryClass(category: string): string {
-  const map: Record<string, string> = {
-    campus: "badge-campus",
-    academic: "badge-academic",
-    sports: "badge-sports",
-    events: "badge-events",
-    opinion: "badge-opinion",
-    clubs: "badge-clubs",
-  };
-  return map[category] || "";
-}
+import { getCategoryClass } from "@/lib/utils";
 
 export default async function PostPage({
   params,
@@ -30,6 +22,7 @@ export default async function PostPage({
 
   const user = await getCurrentUser();
   const reviewData = await getPostReviews(id);
+  const commentsData = await getComments(id);
 
   // Record view
   await recordView(id);
@@ -263,6 +256,14 @@ export default async function PostPage({
           avgRating={reviewData.avgRating}
           reviewCount={reviewData.reviewCount}
           isLoggedIn={!!user}
+        />
+
+        {/* Comments */}
+        <CommentSection
+          postId={id}
+          initialComments={commentsData}
+          isLoggedIn={!!user}
+          currentUserId={user?.userId}
         />
       </article>
     </div>

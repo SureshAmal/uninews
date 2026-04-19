@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import { createPost, type PostState } from "@/app/actions/posts";
 import { uploadFile } from "@/app/actions/upload";
 import { PenLine, Eye, X, Camera, Clapperboard, Plus, Rocket } from "lucide-react";
+import { toast } from "@/components/ui/toast";
 import { RichTextEditor } from "@/components/editor/rich-text-editor";
 const CATEGORIES = [
   { value: "campus", label: "Campus" },
@@ -35,6 +36,11 @@ export default function CreatePostPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 10 * 1024 * 1024) {
+      toast.warning("File too large", "File exceeds the 10MB limit. Please upload a smaller file.");
+      return;
+    }
+
     startUpload(async () => {
       const formData = new FormData();
       formData.set("file", file);
@@ -49,7 +55,7 @@ export default function CreatePostPage() {
           ]);
         }
       } else if (result.error) {
-        alert(result.error);
+        toast.error("Upload failed", result.error);
       }
     });
   };

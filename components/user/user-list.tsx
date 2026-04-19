@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FollowButton } from "@/app/profile/[username]/follow-button";
+import { FollowButton } from "@/components/user/follow-button";
 
 interface UserListItem {
   id: string;

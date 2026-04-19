@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getUserProfile } from "@/app/actions/users";
 import { getCurrentUser } from "@/lib/auth/session";
-import { FollowButton } from "./follow-button";
+import { FollowButton } from "@/components/user/follow-button";
 import { ArticleCard } from "@/components/newspaper/article-card";
 import { BackButton } from "@/components/layout/back-button";
 import type { RankedPost } from "@/lib/feed/ranking";

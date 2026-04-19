@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { login, type AuthState } from "@/app/actions/auth";
 
@@ -9,6 +10,8 @@ export default function LoginPage() {
     login,
     null
   );
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("from") || "/";
 
   return (
     <>
@@ -49,6 +52,7 @@ export default function LoginPage() {
       )}
 
       <form action={formAction}>
+        <input type="hidden" name="redirectTo" value={redirectTo} />
         <div className="input-group" style={{ marginBottom: "1rem" }}>
           <label htmlFor="username" className="input-label">
             Username

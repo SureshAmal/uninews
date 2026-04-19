@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { posts, likes, saves, reposts, reviews, users } from "@/lib/db/schema";
-import { eq, desc, and, sql, count, avg, gt } from "drizzle-orm";
+import { eq, desc, and, sql, count, avg } from "drizzle-orm";
 
 export interface RankedPost {
   id: string;
@@ -31,7 +31,7 @@ export async function getRankedPosts(
   offset = 0,
   category?: string
 ): Promise<RankedPost[]> {
-  // Get published, non-flagged posts
+  // Build conditions
   let conditions = and(
     eq(posts.isPublished, true),
     eq(posts.isFlagged, false)
@@ -41,91 +41,91 @@ export async function getRankedPosts(
     conditions = and(conditions, eq(posts.category, category));
   }
 
-  const allPosts = await db
-    .select()
+  // Single query: join author + subqueries for engagement counts
+  const likeCountSq = sql<number>`(SELECT count(*) FROM ${likes} WHERE ${likes.postId} = ${posts.id})`;
+  const saveCountSq = sql<number>`(SELECT count(*) FROM ${saves} WHERE ${saves.postId} = ${posts.id})`;
+  const repostCountSq = sql<number>`(SELECT count(*) FROM ${reposts} WHERE ${reposts.postId} = ${posts.id})`;
+  const reviewCountSq = sql<number>`(SELECT count(*) FROM ${reviews} WHERE ${reviews.postId} = ${posts.id})`;
+  const reviewAvgSq = sql<number>`(SELECT avg(${reviews.rating}) FROM ${reviews} WHERE ${reviews.postId} = ${posts.id})`;
+
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      content: posts.content,
+      excerpt: posts.excerpt,
+      coverImageUrl: posts.coverImageUrl,
+      mediaUrls: posts.mediaUrls,
+      category: posts.category,
+      tags: posts.tags,
+      viewCount: posts.viewCount,
+      createdAt: posts.createdAt,
+      editedAt: posts.editedAt,
+      authorId: users.id,
+      authorUsername: users.username,
+      authorDisplayName: users.displayName,
+      authorAvatarUrl: users.avatarUrl,
+      likeCount: sql<number>`COALESCE(${likeCountSq}, 0)`,
+      saveCount: sql<number>`COALESCE(${saveCountSq}, 0)`,
+      repostCount: sql<number>`COALESCE(${repostCountSq}, 0)`,
+      reviewCount: sql<number>`COALESCE(${reviewCountSq}, 0)`,
+      reviewAvg: reviewAvgSq,
+    })
     .from(posts)
+    .innerJoin(users, eq(posts.authorId, users.id))
     .where(conditions)
     .orderBy(desc(posts.createdAt))
-    .limit(limit + 20) // fetch more for scoring
+    .limit(limit + 20)
     .offset(offset);
 
-  // Enrich with engagement data + score
-  const enriched = await Promise.all(
-    allPosts.map(async (post) => {
-      const [author] = await db
-        .select({
-          id: users.id,
-          username: users.username,
-          displayName: users.displayName,
-          avatarUrl: users.avatarUrl,
-        })
-        .from(users)
-        .where(eq(users.id, post.authorId));
+  // Calculate scores in JS (exponential decay can't easily be done in SQL)
+  const enriched: RankedPost[] = rows.map((row) => {
+    const likeCount = Number(row.likeCount) || 0;
+    const saveCount = Number(row.saveCount) || 0;
+    const repostCount = Number(row.repostCount) || 0;
+    const reviewCount = Number(row.reviewCount) || 0;
+    const reviewAvg = row.reviewAvg ? parseFloat(String(row.reviewAvg)) : 0;
 
-      const [likeData] = await db
-        .select({ count: count() })
-        .from(likes)
-        .where(eq(likes.postId, post.id));
+    const badReviewPenalty =
+      reviewCount > 0 && reviewAvg <= 2.5 ? reviewCount * 10 : 0;
 
-      const [saveData] = await db
-        .select({ count: count() })
-        .from(saves)
-        .where(eq(saves.postId, post.id));
+    // Recency bonus: exponential decay over 48 hours
+    const ageHours =
+      (Date.now() - row.createdAt.getTime()) / (1000 * 60 * 60);
+    const recencyBonus = Math.max(0, 100 * Math.exp(-ageHours / 24));
 
-      const [repostData] = await db
-        .select({ count: count() })
-        .from(reposts)
-        .where(eq(reposts.postId, post.id));
+    const score =
+      row.viewCount * 1 +
+      likeCount * 3 +
+      repostCount * 5 +
+      saveCount * 2 -
+      badReviewPenalty +
+      recencyBonus;
 
-      const [reviewData] = await db
-        .select({ avgRating: avg(reviews.rating), count: count() })
-        .from(reviews)
-        .where(eq(reviews.postId, post.id));
-
-      // Calculate score
-      const likeCount = likeData.count;
-      const saveCount = saveData.count;
-      const repostCount = repostData.count;
-      const badReviewPenalty =
-        reviewData.count > 0 &&
-        reviewData.avgRating &&
-        parseFloat(String(reviewData.avgRating)) <= 2.5
-          ? reviewData.count * 10
-          : 0;
-
-      // Recency bonus: exponential decay over 48 hours
-      const ageHours =
-        (Date.now() - post.createdAt.getTime()) / (1000 * 60 * 60);
-      const recencyBonus = Math.max(0, 100 * Math.exp(-ageHours / 24));
-
-      const score =
-        post.viewCount * 1 +
-        likeCount * 3 +
-        repostCount * 5 +
-        saveCount * 2 -
-        badReviewPenalty +
-        recencyBonus;
-
-      return {
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        excerpt: post.excerpt,
-        coverImageUrl: post.coverImageUrl,
-        mediaUrls: post.mediaUrls,
-        category: post.category,
-        tags: post.tags,
-        viewCount: post.viewCount,
-        createdAt: post.createdAt,
-        editedAt: post.editedAt,
-        author,
-        likeCount,
-        saveCount,
-        repostCount,
-        score,
-      };
-    })
-  );
+    return {
+      id: row.id,
+      title: row.title,
+      content: row.content,
+      excerpt: row.excerpt,
+      coverImageUrl: row.coverImageUrl,
+      mediaUrls: row.mediaUrls,
+      category: row.category,
+      tags: row.tags,
+      viewCount: row.viewCount,
+      createdAt: row.createdAt,
+      editedAt: row.editedAt,
+      author: {
+        id: row.authorId,
+        username: row.authorUsername,
+        displayName: row.authorDisplayName,
+        avatarUrl: row.authorAvatarUrl,
+      },
+      likeCount,
+      saveCount,
+      repostCount,
+      score,
+    };
+  });
 
   // Sort by score descending
   enriched.sort((a, b) => b.score - a.score);
@@ -135,3 +135,4 @@ export async function getRankedPosts(
 export async function getTrendingPosts(limit = 10): Promise<RankedPost[]> {
   return getRankedPosts(limit, 0);
 }
+

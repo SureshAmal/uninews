@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { ToastContainer } from "@/components/ui/toast";
 import { getCurrentUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -78,6 +79,7 @@ export default async function RootLayout({
             <p>© {new Date().getFullYear()} UniNews. By students, for students.</p>
           </div>
         </footer>
+        <ToastContainer />
       </body>
     </html>
   );

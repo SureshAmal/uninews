@@ -6,6 +6,8 @@ export interface SessionData {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  isAdmin: boolean;
+  isSuspended: boolean;
   isLoggedIn: boolean;
 }
 
@@ -31,11 +33,13 @@ export async function getSession() {
 
 export async function getCurrentUser() {
   const session = await getSession();
-  if (!session.isLoggedIn) return null;
+  if (!session.isLoggedIn || session.isSuspended) return null;
   return {
     userId: session.userId,
     username: session.username,
     displayName: session.displayName,
     avatarUrl: session.avatarUrl,
+    isAdmin: session.isAdmin || false,
+    isSuspended: session.isSuspended || false,
   };
 }

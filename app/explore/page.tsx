@@ -1,4 +1,5 @@
 import { getRankedPosts } from "@/lib/feed/ranking";
+import { searchPosts } from "@/app/actions/posts";
 import { ArticleCard } from "@/components/newspaper/article-card";
 import Link from "next/link";
 import { Search } from "lucide-react";
@@ -22,19 +23,15 @@ export default async function ExplorePage({
 
   let posts: Awaited<ReturnType<typeof getRankedPosts>> = [];
   try {
-    posts = await getRankedPosts(30, 0, category);
+    // Use backend search if query exists, otherwise ranked feed
+    if (q && q.trim()) {
+      posts = await searchPosts(q.trim(), category);
+    } else {
+      posts = await getRankedPosts(30, 0, category);
+    }
   } catch {
     // DB not connected
   }
-
-  // Filter by search query if provided
-  const filtered = q
-    ? posts.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q.toLowerCase()) ||
-          p.content.toLowerCase().includes(q.toLowerCase())
-      )
-    : posts;
 
   return (
     <div
@@ -90,7 +87,7 @@ export default async function ExplorePage({
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.value}
-            href={`/explore${cat.value === "all" ? "" : `?category=${cat.value}`}`}
+            href={`/explore${cat.value === "all" ? "" : `?category=${cat.value}`}${q ? `${cat.value === "all" ? "?" : "&"}q=${encodeURIComponent(q)}` : ""}`}
             className={`btn btn-sm ${
               category === cat.value ||
               (cat.value === "all" && category === "all")
@@ -104,7 +101,7 @@ export default async function ExplorePage({
       </div>
 
       {/* Results */}
-      {filtered.length === 0 ? (
+      {posts.length === 0 ? (
         <div
           style={{
             textAlign: "center",
@@ -139,7 +136,7 @@ export default async function ExplorePage({
           }}
           className="stagger-children"
         >
-          {filtered.map((post) => (
+          {posts.map((post) => (
             <ArticleCard key={post.id} post={post} size="medium" />
           ))}
         </div>

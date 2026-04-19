@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/app/actions/auth";
-import { PenLine, User, Settings, LogOut } from "lucide-react";
+import { PenLine, User, Settings, LogOut, Bookmark } from "lucide-react";
 
 interface NavUser {
   userId: string;
@@ -16,12 +16,25 @@ interface NavUser {
 export function Navbar({ user }: { user: NavUser | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
 
   return (
     <>
@@ -105,11 +118,11 @@ export function Navbar({ user }: { user: NavUser | null }) {
             <ThemeToggle />
 
             {user ? (
-              <>
+              <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Link href="/create" className="btn btn-primary btn-sm">
-                  <PenLine size={16} /> <span className="nav-desktop">Post</span>
+                  <PenLine size={16} /> Post
                 </Link>
-                <div style={{ position: "relative" }}>
+                <div style={{ position: "relative" }} ref={menuRef}>
                   <button
                     onClick={() => setMenuOpen(!menuOpen)}
                     className="avatar avatar-md"
@@ -204,6 +217,20 @@ export function Navbar({ user }: { user: NavUser | null }) {
                       >
                         <Settings size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Settings
                       </Link>
+                      <Link
+                        href="/saved"
+                        onClick={() => setMenuOpen(false)}
+                        style={{
+                          display: "block",
+                          padding: "0.5rem 0.75rem",
+                          fontSize: "0.875rem",
+                          color: "var(--text-secondary)",
+                          textDecoration: "none",
+                          borderRadius: "var(--radius-sm)",
+                        }}
+                      >
+                        <Bookmark size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Saved
+                      </Link>
                       <form action={logout}>
                         <button
                           type="submit"
@@ -226,26 +253,17 @@ export function Navbar({ user }: { user: NavUser | null }) {
                     </div>
                   )}
                 </div>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Link href="/login" className="btn btn-ghost btn-sm">
                   Log in
                 </Link>
                 <Link href="/signup" className="btn btn-primary btn-sm">
                   Sign up
                 </Link>
-              </>
+              </div>
             )}
-
-            {/* Mobile hamburger */}
-            <button
-              className="btn btn-ghost btn-icon nav-mobile-only"
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{ display: "none" }}
-            >
-              ☰
-            </button>
           </div>
         </div>
       </nav>
