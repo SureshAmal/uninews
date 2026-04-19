@@ -29,6 +29,10 @@ export type PostState = {
   fieldErrors?: Record<string, string[]>;
 } | null;
 
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>?/gm, "");
+}
+
 export async function createPost(
   _prevState: PostState,
   formData: FormData
@@ -66,7 +70,7 @@ export async function createPost(
       content: parsed.data.content,
       excerpt:
         parsed.data.excerpt ||
-        parsed.data.content.substring(0, 300) + "...",
+        stripHtml(parsed.data.content).substring(0, 300) + "...",
       category: parsed.data.category,
       tags: tagsArray,
       coverImageUrl: parsed.data.coverImageUrl || null,
@@ -122,7 +126,7 @@ export async function updatePost(
     .set({
       title: parsed.data.title,
       content: parsed.data.content,
-      excerpt: parsed.data.excerpt || parsed.data.content.substring(0, 300),
+      excerpt: parsed.data.excerpt || stripHtml(parsed.data.content).substring(0, 300),
       category: parsed.data.category,
       tags: tagsArray,
       coverImageUrl: parsed.data.coverImageUrl || existing.coverImageUrl,

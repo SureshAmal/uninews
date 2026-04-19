@@ -20,7 +20,7 @@ export function Masthead() {
         <span>Edition #{editionNo}</span>
       </div>
       <div className="masthead-rule" />
-      <div className="masthead-meta nav-scroll">
+      {/* <div className="masthead-meta nav-scroll">
         <span>Campus</span>
         <span>•</span>
         <span>Academic</span>
@@ -32,7 +32,7 @@ export function Masthead() {
         <span>Opinion</span>
         <span>•</span>
         <span>Clubs</span>
-      </div>
+      </div> */}
     </header>
   );
 }

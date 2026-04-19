@@ -152,18 +152,26 @@ export default async function ProfilePage({
               </strong>{" "}
               <span style={{ color: "var(--text-tertiary)" }}>posts</span>
             </div>
-            <div>
+            <Link
+              href={`/profile/${profile.username}/social?tab=followers`}
+              className="hover-underline"
+              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+            >
               <strong style={{ color: "var(--text-primary)" }}>
                 {profile.followerCount}
               </strong>{" "}
               <span style={{ color: "var(--text-tertiary)" }}>followers</span>
-            </div>
-            <div>
+            </Link>
+            <Link
+              href={`/profile/${profile.username}/social?tab=following`}
+              className="hover-underline"
+              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+            >
               <strong style={{ color: "var(--text-primary)" }}>
                 {profile.followingCount}
               </strong>{" "}
               <span style={{ color: "var(--text-tertiary)" }}>following</span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>

@@ -115,6 +115,10 @@ body {
   color: white;
 }
 
+.hover-underline:hover {
+  text-decoration: underline !important;
+}
+
 /* ─── Typography ───────────────────────────────────────────────── */
 h1,
 h2,
@@ -850,4 +854,225 @@ textarea.input {
 .rich-text-content li,
 .text-editor-content li {
   margin-bottom: 0.4rem;
+}
+
+/* ─── Social & Connection Components ────────────────────────────── */
+.social-page-wrapper {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.social-tabs-nav {
+  display: flex;
+  gap: 2.5rem;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 2rem;
+}
+
+.social-tab-link {
+  text-decoration: none;
+  padding: 0.875rem 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.social-tab-link:hover {
+  color: var(--text-secondary);
+}
+
+.social-tab-link.active {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.social-tab-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.social-tab-link.active::after {
+  transform: scaleX(1);
+}
+
+.user-list-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
+}
+
+.user-list-item {
+  background: var(--bg-primary);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: background 0.2s ease;
+}
+
+.user-list-item:hover {
+  background: var(--bg-hover);
+}
+
+.social-page-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.social-tab-count {
+  margin-left: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.user-item-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.user-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-item-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  margin-bottom: 0.125rem;
+  color: var(--text-primary);
+}
+
+.user-item-handle {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary) !important;
+  margin-bottom: 0.25rem;
+}
+
+.user-item-bio {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  WebkitLineClamp: 1;
+  WebkitBoxOrient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Review & Feedback Components ──────────────────────────────── */
+.review-highlight-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.review-avg-score {
+  grid-row: 1 / span 2;
+  font-size: 2.75rem;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  line-height: 0.9;
+  display: flex;
+  align-items: center;
+}
+
+.review-meta-stars {
+  display: flex;
+  gap: 2px;
+  align-self: end;
+  margin-bottom: 0.25rem;
+}
+
+.review-meta-count {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  align-self: start;
+}
+
+.review-success-p {
+  font-size: 0.875rem;
+  color: var(--success);
+  padding: 1rem;
+  background: rgba(45,138,78,0.08);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.review-login-prompt {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  margin-top: 1rem;
+}
+
+.review-empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ─── Navigation Extensions ─────────────────────────────────────── */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-left: -1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.btn-back:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }

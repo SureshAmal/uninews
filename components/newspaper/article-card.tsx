@@ -34,6 +34,10 @@ function getCategoryClass(category: string): string {
   return map[category] || "";
 }
 
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>?/gm, "");
+}
+
 export function ArticleCard({
   post,
   size = "medium",
@@ -94,7 +98,7 @@ export function ArticleCard({
                 overflow: "hidden",
               }}
             >
-              {post.excerpt || post.content.substring(0, 200)}
+              {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 200)}
             </p>
             <div
               style={{
@@ -162,7 +166,7 @@ export function ArticleCard({
                 overflow: "hidden",
               }}
             >
-              {post.excerpt || post.content.substring(0, 150)}
+              {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 150)}
             </p>
             <div
               style={{
@@ -280,7 +284,7 @@ export function ArticleCard({
               overflow: "hidden",
             }}
           >
-            {post.excerpt || post.content.substring(0, 120)}
+            {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 120)}
           </p>
           <div
             style={{
@@ -302,3 +306,4 @@ export function ArticleCard({
     </Link>
   );
 }
+

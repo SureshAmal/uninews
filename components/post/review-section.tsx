@@ -35,45 +35,29 @@ export function ReviewSection({
     <div style={{ marginTop: "2rem" }}>
       <div className="section-divider">Reviews</div>
 
-      {/* Average rating display */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "2.5rem",
-            fontWeight: 700,
-            fontFamily: "var(--font-heading)",
-            color: "var(--text-primary)",
-          }}
-        >
+      <div className="review-highlight-grid">
+        <div className="review-avg-score">
           {avgRating.toFixed(1)}
         </div>
-        <div>
-          <div className="star-rating">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <span
-                key={star}
-                className={`star ${star <= Math.round(avgRating) ? "filled" : ""}`}
-                style={{ cursor: "default" }}
-              >
-                <Star size={16} fill={star <= Math.round(avgRating) ? "currentColor" : "none"} />
-              </span>
-            ))}
-          </div>
-          <span
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--text-tertiary)",
-            }}
-          >
-            {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
-          </span>
+        
+        <div className="review-meta-stars">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              className={`star ${star <= Math.round(avgRating) ? "filled" : ""}`}
+              style={{ cursor: "default" }}
+            >
+              <Star 
+                size={18} 
+                fill={star <= Math.round(avgRating) ? "var(--accent)" : "none"} 
+                strokeWidth={1.5}
+              />
+            </span>
+          ))}
+        </div>
+
+        <div className="review-meta-count">
+          {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
         </div>
       </div>
 
@@ -125,22 +109,11 @@ export function ReviewSection({
           </button>
         </form>
       ) : submitted ? (
-          <p
-          style={{
-            fontSize: "0.875rem",
-            color: "var(--success)",
-            padding: "0.75rem",
-            background: "rgba(45,138,78,0.08)",
-            borderRadius: "var(--radius-sm)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem"
-          }}
-        >
+        <p className="review-success-p">
           <CheckCircle size={16} /> Review submitted! Thank you for your feedback.
         </p>
       ) : (
-        <p style={{ fontSize: "0.8125rem", color: "var(--text-tertiary)" }}>
+        <p className="review-login-prompt">
           Log in to leave a review.
         </p>
       )}

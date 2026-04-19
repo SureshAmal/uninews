@@ -124,3 +124,93 @@ export async function updateProfile(formData: FormData) {
 
   return { success: true };
 }
+
+export async function getFollowers(username: string) {
+  const [targetUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (!targetUser) return null;
+
+  const followerRecords = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      displayName: users.displayName,
+      avatarUrl: users.avatarUrl,
+      bio: users.bio,
+    })
+    .from(follows)
+    .innerJoin(users, eq(follows.followerId, users.id))
+    .where(eq(follows.followingId, targetUser.id));
+
+  const currentUser = await getCurrentUser();
+  const results = await Promise.all(
+    followerRecords.map(async (u) => {
+      let isFollowing = false;
+      if (currentUser) {
+        const [f] = await db
+          .select()
+          .from(follows)
+          .where(
+            and(
+              eq(follows.followerId, currentUser.userId),
+              eq(follows.followingId, u.id)
+            )
+          )
+          .limit(1);
+        isFollowing = !!f;
+      }
+      return { ...u, isFollowing };
+    })
+  );
+
+  return results;
+}
+
+export async function getFollowing(username: string) {
+  const [targetUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (!targetUser) return null;
+
+  const followingRecords = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      displayName: users.displayName,
+      avatarUrl: users.avatarUrl,
+      bio: users.bio,
+    })
+    .from(follows)
+    .innerJoin(users, eq(follows.followingId, users.id))
+    .where(eq(follows.followerId, targetUser.id));
+
+  const currentUser = await getCurrentUser();
+  const results = await Promise.all(
+    followingRecords.map(async (u) => {
+      let isFollowing = false;
+      if (currentUser) {
+        const [f] = await db
+          .select()
+          .from(follows)
+          .where(
+            and(
+              eq(follows.followerId, currentUser.userId),
+              eq(follows.followingId, u.id)
+            )
+          )
+          .limit(1);
+        isFollowing = !!f;
+      }
+      return { ...u, isFollowing };
+    })
+  );
+
+  return results;
+}
