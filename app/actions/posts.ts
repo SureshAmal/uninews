@@ -55,7 +55,7 @@ export async function createPost(
   }
 
   const tagsArray = parsed.data.tags
-    ? parsed.data.tags.split(",").map((t) => t.trim()).filter(Boolean)
+    ? parsed.data.tags.split(",").map((t) => t.trim().replace(/^#+/, "")).filter(Boolean)
     : null;
 
   // Parse media URLs from formData
@@ -121,7 +121,7 @@ export async function updatePost(
   }
 
   const tagsArray = parsed.data.tags
-    ? parsed.data.tags.split(",").map((t) => t.trim()).filter(Boolean)
+    ? parsed.data.tags.split(",").map((t) => t.trim().replace(/^#+/, "")).filter(Boolean)
     : null;
 
   const mediaUrlsRaw = formData.get("mediaUrls") as string;
@@ -329,8 +329,8 @@ export async function getPostWithEngagement(postId: string) {
   };
 }
 
-export async function getRankedFeed(offset: number) {
-  return await getRankedPosts(10, offset);
+export async function getRankedFeed(offset: number, tag?: string) {
+  return await getRankedPosts(10, offset, "all", tag);
 }
 
 export async function searchPosts(query: string, category?: string, limit = 30) {

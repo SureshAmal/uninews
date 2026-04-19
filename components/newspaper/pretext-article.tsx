@@ -28,7 +28,7 @@ function parseTipTapToRichInline(html: string) {
   const doc = parser.parseFromString(html, "text/html");
   const items: any[] = [];
   const metadataMap: Record<number, ItemMetadata> = {};
-  const obstacles: { src: string, align: string, width: string, node: HTMLElement }[] = [];
+  const obstacles: { src: string, align: string, width: string, node: HTMLElement, itemIndex: number }[] = [];
 
   const walk = (node: Node, currentFont: string = "400 17px Georgia", extraMeta: ItemMetadata = {}) => {
     node.childNodes.forEach(child => {
@@ -49,6 +49,9 @@ function parseTipTapToRichInline(html: string) {
 
         if (el.tagName === "STRONG" || el.tagName === "B") nextFont = nextFont.replace("400", "700");
         if (el.tagName === "EM" || el.tagName === "I") nextFont += " italic";
+        if (el.tagName === "H1") nextFont = nextFont.replace("17px", "32px").replace("400", "700");
+        if (el.tagName === "H2") nextFont = nextFont.replace("17px", "24px").replace("400", "700");
+        if (el.tagName === "H3") nextFont = nextFont.replace("17px", "20px").replace("400", "700");
         
         if (el.style && el.style.color) {
             nextMeta.color = el.style.color;
@@ -82,12 +85,13 @@ function parseTipTapToRichInline(html: string) {
           const src = el.getAttribute("src") || "";
           
           if (align === "inline") {
-             metadataMap[items.length] = { isInlineImage: true, src, width: String(width), fontWeight: "400" };
+             const cappedWidth = Math.min(width, 48); // Cap inline images to sticker size
+             metadataMap[items.length] = { isInlineImage: true, src, width: String(cappedWidth), fontWeight: "400" };
              items.push({ 
-               text: "\uFFFC", // Object Replacement Character (prevents collapse, behaves as non-breaking)
+               text: "\uFFFC", 
                font: "400 17px Georgia",
                break: "never", 
-               extraWidth: width 
+               extraWidth: cappedWidth 
              });
           } else {
              metadataMap[items.length] = {};
@@ -119,45 +123,63 @@ function parseTipTapToRichInline(html: string) {
   return { items, metadataMap, obstacles };
 }
 
-export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const layoutData = useMemo(() => {
+export function computePretextLayout(content: string, containerWidth: number, columnCount: number) {
+    if (!containerWidth || typeof window === 'undefined') return null;
+    
     if (!containerWidth) return null;
 
     const { items, metadataMap, obstacles } = parseTipTapToRichInline(content);
     const prepared = prepareRichInline(items);
 
     const COLUMN_GAP = 40;
-    const colWidth = (containerWidth - (COLUMN_GAP * (columnCount - 1))) / columnCount;
+    let actualColumnCount = columnCount;
+    let colWidth = (containerWidth - (COLUMN_GAP * (actualColumnCount - 1))) / actualColumnCount;
     const LINE_HEIGHT = 28;
 
     const { layoutNextRichInlineLineRange } = require("@chenglou/pretext/rich-inline");
     
-    // Pass 1: Measure total lines
-    let totalLineCount = 0;
+    const getLineHeightForRange = (range: any) => {
+        const line = materializeRichInlineLineRange(prepared, range);
+        let maxLineHeight = LINE_HEIGHT;
+        for (const f of line.fragments) {
+            const itemFont = items[f.itemIndex]?.font || "400 17px Georgia";
+            if (itemFont.includes("32px")) maxLineHeight = Math.max(maxLineHeight, 46);
+            else if (itemFont.includes("24px")) maxLineHeight = Math.max(maxLineHeight, 36);
+            else if (itemFont.includes("20px")) maxLineHeight = Math.max(maxLineHeight, 30);
+            
+            const meta = metadataMap[f.itemIndex] || {};
+            if (meta.isInlineImage) {
+                maxLineHeight = Math.max(maxLineHeight, parseInt(meta.width || "48") * 0.75 + 10);
+            } else if (meta.isSticker) {
+                maxLineHeight = Math.max(maxLineHeight, 36);
+            }
+        }
+        return maxLineHeight;
+    };
+
+    // Pass 1: Measure total lines with actual heights
+    let totalContentHeight = 0;
     let tempCursor = { itemIndex: 0, segmentIndex: 0, graphemeIndex: 0 };
     while (true) {
         const r = layoutNextRichInlineLineRange(prepared, colWidth, tempCursor);
         if (!r) break;
+        totalContentHeight += getLineHeightForRange(r);
         tempCursor = r.end;
-        totalLineCount++;
     }
 
-    const linesPerColumn = Math.ceil(totalLineCount / columnCount);
-    const targetColHeight = Math.max(1, linesPerColumn) * LINE_HEIGHT;
+    // Adaptive Column Reduction: If the content is too short for the requested columns, reduce column count
+    // Aim for at least 120 pixels of vertical content (approx 4-5 lines) per column.
+    const MIN_COL_HEIGHT = 120;
+    while (actualColumnCount > 1 && totalContentHeight / actualColumnCount < MIN_COL_HEIGHT) {
+        actualColumnCount--;
+    }
+
+    // Recalculate targetColHeight and colWidth if columns were reduced
+    if (actualColumnCount !== columnCount) {
+        colWidth = (containerWidth - (COLUMN_GAP * (actualColumnCount - 1))) / actualColumnCount;
+    }
+    const targetColHeight = Math.ceil(totalContentHeight / actualColumnCount);
     
     const renderedLines: any[] = [];
     let currentCursor = { itemIndex: 0, segmentIndex: 0, graphemeIndex: 0 };
@@ -215,17 +237,7 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         if (!rangeResult) break;
 
         const line = materializeRichInlineLineRange(prepared, rangeResult);
-        
-        let maxLineHeight = LINE_HEIGHT;
-        for (const f of line.fragments) {
-            const meta = metadataMap[f.itemIndex] || {};
-            if (meta.isInlineImage) {
-                // assume 4:3 ratio + 10px padding for inline images
-                maxLineHeight = Math.max(maxLineHeight, parseInt(meta.width || "300") * 0.75 + 10);
-            } else if (meta.isSticker) {
-                maxLineHeight = Math.max(maxLineHeight, 36);
-            }
-        }
+        const maxLineHeight = getLineHeightForRange(rangeResult);
 
         renderedLines.push({
             fragments: line.fragments,
@@ -242,7 +254,7 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         maxHeight = Math.max(maxHeight, yInColumn);
         if (activeObs.length > 0) { maxHeight = Math.max(maxHeight, activeObs[0].y + activeObs[0].height); }
 
-        if (columnCount > 1 && yInColumn >= targetColHeight && columnIndex < columnCount - 1) {
+        if (actualColumnCount > 1 && yInColumn >= targetColHeight && columnIndex < actualColumnCount - 1) {
             columnIndex++;
             yInColumn = 0;
         }
@@ -257,8 +269,26 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         }
     });
 
-    return { renderedLines, colWidth, placedObstacles, maxHeight, metadataMap, items };
-  }, [content, containerWidth, columnCount]);
+    
+    return { renderedLines, colWidth, placedObstacles, maxHeight, metadataMap, items, COLUMN_GAP, actualColumnCount };
+}
+
+export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const layoutData = useMemo(() => computePretextLayout(content, containerWidth, columnCount), [content, containerWidth, columnCount]);
 
   return (
     <div
@@ -273,6 +303,21 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         overflow: "hidden"
       }}
     >
+      {layoutData && layoutData.actualColumnCount > 1 && Array.from({ length: layoutData.actualColumnCount - 1 }).map((_, i) => (
+        <div
+          key={`divider-${i}`}
+          style={{
+            position: "absolute",
+            left: Math.round((i + 1) * (layoutData.colWidth + layoutData.COLUMN_GAP) - layoutData.COLUMN_GAP / 2),
+            top: 0,
+            bottom: 0,
+            width: "1px",
+            backgroundColor: "var(--border-color, rgba(0, 0, 0, 0.1))",
+            zIndex: 1
+          }}
+        />
+      ))}
+
       {layoutData && layoutData.placedObstacles.map((obs: any, i: number) => (
         <div
           key={`obs-${i}`}
@@ -306,27 +351,33 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
             color: "var(--text-secondary)",
             fontFamily: "Georgia, serif",
             visibility: line.isHidden ? "hidden" : "visible",
-            display: "flex", // Use flex to respect gaps easily
-            alignItems: line.height > 28 ? "center" : "baseline"
+            display: "flex", 
+            alignItems: "baseline"
           }}
         >
           {line.fragments.map((f: any, fi: number) => {
             const meta = layoutData.metadataMap[f.itemIndex] || {};
             const itemFont = layoutData.items[f.itemIndex]?.font || "400 17px Georgia";
-            const style = { 
-                font: meta.isPill ? itemFont.replace("17px", "14px") : itemFont,
+            const style: React.CSSProperties = { 
                 color: meta.color || "inherit",
                 background: meta.background || "none",
                 padding: meta.isPill ? "2px 8px" : "0",
                 borderRadius: meta.isPill ? "100px" : "0",
-                fontWeight: meta.fontWeight || "inherit",
                 textDecoration: meta.textDecoration || "none",
                 marginLeft: f.gapBefore + "px", 
-                display: "inline-block",
-                lineHeight: "1.2",
-                alignSelf: "center",
-                transform: meta.isPill ? "translateY(-1px)" : "none"
+                transform: meta.isPill ? "translateY(-1px)" : "none",
+                verticalAlign: meta.isInlineImage ? "-20%" : "baseline"
             };
+
+            // Parse the font shorthand into safe longhand properties to avoid React conflicts
+            const fontParts = itemFont.split(" ");
+            if (fontParts.length >= 3) {
+              style.fontWeight = meta.fontWeight || fontParts[0];
+              style.fontSize = meta.isPill ? "14px" : fontParts[1];
+              style.fontFamily = fontParts.slice(2).join(" ");
+            } else {
+              style.font = itemFont;
+            }
 
             if (meta.isInlineImage) {
                 return (

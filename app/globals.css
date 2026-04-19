@@ -404,6 +404,13 @@ textarea.input {
   color: var(--accent-text);
 }
 
+.tag-pill-hover:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--text-tertiary) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
 .badge-campus {
   background: #dbeafe;
   color: #1d4ed8;

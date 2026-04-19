@@ -23,7 +23,7 @@ export default async function RootLayout({
   const announcement = await getActiveAnnouncement();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -31,14 +31,18 @@ export default async function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        <Script
+        <script
           id="theme-init"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                var theme = localStorage.getItem('uninews-theme') || 'light';
-                document.documentElement.setAttribute('data-theme', theme);
+                try {
+                  var theme = localStorage.getItem('uninews-theme');
+                  var supportDark = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+                  if (!theme && supportDark) theme = 'dark';
+                  if (!theme) theme = 'light';
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {}
               })();
             `,
           }}

@@ -133,7 +133,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
           <div className="input-group">
             <label htmlFor="tags" className="input-label">
-              Tags (comma-separated)
+              Tags (comma-separated, no # needed)
             </label>
             <input
               id="tags"

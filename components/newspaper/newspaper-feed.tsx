@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { deletePost, getRankedFeed } from "@/app/actions/posts";
 import type { RankedPost } from "@/lib/feed/ranking";
-import { PretextArticle } from "./pretext-article";
+import { PretextArticle, computePretextLayout } from "./pretext-article";
 import { prepare, layout } from "@chenglou/pretext";
 import { stripHtml } from "@/lib/utils";
 import { Trash2, Edit2 } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 // Configuration for the broadsheet grid
 const ROW_HEIGHT = 5; // 5px row slices for fine-grained packing
@@ -17,40 +18,19 @@ const COL_COUNT = 12;
 // Helper component for each article to auto-correct its height perfectly.
 function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
   const innerRef = useRef<HTMLDivElement>(null);
-  const [actualRowSpan, setActualRowSpan] = useState<number>(post.rowSpan);
+  // Just use post.rowSpan exactly to avoid jitter and ensure tight dense packing
+  const actualRowSpan = post.rowSpan;
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  useEffect(() => {
-    if (!innerRef.current) return;
-    
-    // Auto-correct height mismatch between Pretext and DOM
-    const obs = new ResizeObserver((entries) => {
-      const innerRect = entries[0].target.getBoundingClientRect();
-      
-      // innerRect measures the raw content. We MUST add the <article> padding (16px), margin (8px),
-      // border (1px), and a small safety gap (15px) so they don't overlap vertically!
-      const verticalOverhead = 40; 
-      const idealHeight = innerRect.height + verticalOverhead; 
-      const computedSpan = Math.ceil(idealHeight / ROW_HEIGHT);
-      
-      // Update only if difference is significant (to prevent 1px jitter loops)
-      if (Math.abs(computedSpan - actualRowSpan) > 2) {
-        setActualRowSpan(computedSpan);
-      }
-    });
-
-    obs.observe(innerRef.current);
-    return () => obs.disconnect();
-  }, [actualRowSpan]);
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this edition? This cannot be undone.")) return;
+  const confirmDelete = async () => {
     setIsDeleting(true);
     await deletePost(post.id);
     setIsDeleting(false);
   };
 
-  const isAuthor = currentUser?.userId === post.authorId;
+  const isAuthor = currentUser && currentUser.userId === post.author?.id;
+  const isAdmin = currentUser?.isAdmin;
 
   return (
     <article 
@@ -67,46 +47,19 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
         pointerEvents: isDeleting ? "none" : "auto"
       }}
     >
+      {/* Premium Confirm Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title={isAdmin ? "Wipe Edition?" : "Archive Edition?"}
+        message={isAdmin 
+            ? "As an admin, you are permanently deleting this data from the database. This cannot be undone." 
+            : "Are you sure you want to archive this edition? It will be hidden from the feed and your profile."}
+        confirmText={isAdmin ? "Hard Delete" : "Archive Edition"}
+      />
+
       <div ref={innerRef} style={{ display: "flex", flexDirection: "column" }}>
-        {/* Author Controls */}
-        {isAuthor && (
-          <div style={{ 
-              display: "flex", 
-              gap: "0.75rem", 
-              position: "absolute", 
-              top: "-0.5rem", 
-              right: 0, 
-              zIndex: 10,
-              background: "var(--bg-primary)",
-              padding: "0.25rem 0.5rem",
-              borderRadius: "4px",
-              border: "1px solid var(--border-color)",
-              boxShadow: "var(--shadow-sm)"
-          }}>
-            <Link 
-                href={`/post/${post.id}/edit`} 
-                title="Edit Post"
-                style={{ color: "var(--text-secondary)", display: "flex", alignItems: "center" }}
-            >
-              <Edit2 size={14} />
-            </Link>
-            <button 
-                onClick={handleDelete}
-                title="Delete Post"
-                style={{ 
-                    background: "none", 
-                    border: "none", 
-                    cursor: "pointer", 
-                    color: "var(--error)", 
-                    padding: 0,
-                    display: "flex",
-                    alignItems: "center"
-                }}
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        )}
         {post.coverImageUrl && (
           <div style={{ marginBottom: "1rem", height: post.imageHeight, overflow: "hidden" }}>
             <Link href={`/post/${post.id}`}>
@@ -142,13 +95,37 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
           </Link>
 
           <PretextArticle content={post.content} columnCount={post.textColumns} />
+
+          {post.tags && post.tags.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem" }}>
+              {post.tags.slice(0, 3).map((tag: string) => (
+                <Link 
+                  key={tag} 
+                  href={`/tag/${tag}`}
+                  className="tag-pill-hover"
+                  style={{ 
+                    fontSize: "0.7rem", 
+                    color: "var(--text-tertiary)", 
+                    background: "var(--bg-tertiary)", 
+                    padding: "0.15rem 0.6rem", 
+                    borderRadius: "100px",
+                    textDecoration: "none",
+                    border: "1px solid var(--border-color)",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </article>
   );
 }
 
-export function NewspaperFeed({ initialPosts, currentUser }: { initialPosts: RankedPost[], currentUser: any }) {
+export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initialPosts: RankedPost[], currentUser: any, tagFilter?: string }) {
   const [posts, setPosts] = useState<RankedPost[]>(initialPosts);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= 10);
@@ -169,7 +146,7 @@ export function NewspaperFeed({ initialPosts, currentUser }: { initialPosts: Ran
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const morePosts = await getRankedFeed(posts.length);
+      const morePosts = await getRankedFeed(posts.length, tagFilter);
       if (morePosts.length === 0) {
         setHasMore(false);
       } else {
@@ -309,17 +286,17 @@ export function NewspaperFeed({ initialPosts, currentUser }: { initialPosts: Ran
         const preparedTitle = prepare(m.title, titleFont, { whiteSpace: "pre-wrap" });
         const titleHeight = layout(preparedTitle, totalArticleWidth, titleLineHeight).height;
 
-        const plainTextBody = stripHtml(m.content);
-        const preparedBody = prepare(plainTextBody, bodyFont, { whiteSpace: "pre-wrap" });
-        const bodyHeight = layout(preparedBody, textColWidth, bodyLineHeight).height / textColumns;
-
         const imgRatio = isMobile ? 0.5625 : (m.colSpan >= 12 ? 0.35 : m.colSpan > 8 ? 0.45 : 0.65);
         let imageHeight = hasImage ? (totalArticleWidth * imgRatio) : 0; 
         
         // Cap image height to prevent dominance on ultra-wide screens
         if (!isMobile && imageHeight > 500) imageHeight = 500;
         
-        const extraHeight = 60; 
+        // Use PRETEXT natively exact calculation !!!
+        const exactLayout = computePretextLayout(m.content, totalArticleWidth, textColumns);
+        const bodyHeight = exactLayout ? exactLayout.maxHeight : 0;
+        
+        const extraHeight = 120; // Overheads: paddings, margins, gaps
 
         const totalHeightPx = titleHeight + bodyHeight + imageHeight + extraHeight;
         const rowSpan = Math.min(1500, Math.ceil(totalHeightPx / ROW_HEIGHT));

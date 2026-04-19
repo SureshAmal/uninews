@@ -216,7 +216,9 @@ export async function getPostsAdmin(
   category = "all", 
   status = "all",
   sortBy = "createdAt",
-  sortOrder = "desc"
+  sortOrder = "desc",
+  authorId?: string,
+  tag?: string
 ) {
   await requireAdmin();
   const offset = (page - 1) * limit;
@@ -227,6 +229,12 @@ export async function getPostsAdmin(
   }
   if (category && category !== "all") {
     query = query.where(eq(posts.category, category));
+  }
+  if (authorId && authorId !== "all") {
+    query = query.where(eq(posts.authorId, authorId));
+  }
+  if (tag && tag !== "all") {
+    query = query.where(sql`${tag} = ANY(${posts.tags})`);
   }
   if (status === "published") {
     query = query.where(sql`${posts.isPublished} = true AND ${posts.isFlagged} = false`);
@@ -262,6 +270,12 @@ export async function getPostsAdmin(
   if (category && category !== "all") {
     fetchQuery = fetchQuery.where(eq(posts.category, category));
   }
+  if (authorId && authorId !== "all") {
+    fetchQuery = fetchQuery.where(eq(posts.authorId, authorId));
+  }
+  if (tag && tag !== "all") {
+    fetchQuery = fetchQuery.where(sql`${tag} = ANY(${posts.tags})`);
+  }
   if (status === "published") {
     fetchQuery = fetchQuery.where(sql`${posts.isPublished} = true AND ${posts.isFlagged} = false`);
   } else if (status === "flagged") {
@@ -293,6 +307,27 @@ export async function getPostsAdmin(
     page,
     totalPages: Math.ceil(totalResult.count / limit),
   };
+}
+
+export async function getAuthorsSummary() {
+  await requireAdmin();
+  return await db
+    .select({
+      id: users.id,
+      username: users.username,
+      displayName: users.displayName,
+    })
+    .from(users)
+    .innerJoin(posts, eq(posts.authorId, users.id))
+    .groupBy(users.id, users.username, users.displayName)
+    .orderBy(users.username);
+}
+
+export async function getUniqueTagsSummary() {
+  await requireAdmin();
+  const res = await db.execute(sql`SELECT DISTINCT unnest(${posts.tags}) as tag FROM ${posts} WHERE ${posts.tags} IS NOT NULL`);
+  const items = Array.isArray(res) ? res : ((res as any).rows || []);
+  return items.map((r: any) => r.tag as string).filter(Boolean).sort();
 }
 
 /** Toggles isPublished and isFlagged */

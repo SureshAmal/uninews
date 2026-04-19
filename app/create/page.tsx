@@ -6,6 +6,7 @@ import { uploadFile } from "@/app/actions/upload";
 import { Rocket } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { DirectPreviewEditor } from "@/components/editor/direct-preview-editor";
+import { BackButton } from "@/components/layout/back-button";
 
 const CATEGORIES = [
   { value: "campus", label: "Campus" },
@@ -61,130 +62,125 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="create-post-container animate-fade-in">
-      <style jsx>{`
-        .create-post-container {
-          padding: 2rem 1rem 4rem;
-          max-width: 740px;
-          margin: 0 auto;
-        }
-        @media (min-width: 768px) {
-          .create-post-container {
-            padding: 2rem 0 4rem;
-          }
-        }
-      `}</style>
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "2rem",
-          fontWeight: 700,
-          marginBottom: "0.5rem",
-        }}
-      >
-        Write a Post
-      </h1>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "2rem",
-        }}
-      >
-        Share news, stories, and updates with your campus
-      </p>
+    <div className="container-news" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+      <BackButton />
 
-      {state?.error && (
-        <div
+      <div 
+        className="animate-fade-in" 
+        style={{ maxWidth: 740, margin: "2rem auto 0 auto" }}
+      >
+        <h1
           style={{
-            padding: "0.75rem 1rem",
-            background: "rgba(196,30,58,0.08)",
-            border: "1px solid rgba(196,30,58,0.2)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--error)",
-            fontSize: "0.8125rem",
-            marginBottom: "1rem",
+            fontFamily: "var(--font-heading)",
+            fontSize: "2rem",
+            fontWeight: 700,
+            marginBottom: "0.5rem",
           }}
         >
-          {state.error}
-        </div>
-      )}
+          Write a Post
+        </h1>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "var(--text-tertiary)",
+            marginBottom: "2rem",
+          }}
+        >
+          Share news, stories, and updates with your campus
+        </p>
 
-      <div className="animate-fade-in">
-        <form action={formAction}>
-          <input type="hidden" name="coverImageUrl" value={coverImage} />
-          <input type="hidden" name="title" value={title} />
-          <input type="hidden" name="content" value={content} />
-          <input
-            type="hidden"
-            name="mediaUrls"
-            value={JSON.stringify(mediaUrls)}
-          />
-
-          <DirectPreviewEditor
-            title={title}
-            onTitleChange={setTitle}
-            content={content}
-            onChange={setContent}
-            coverImage={coverImage}
-            onCoverImageClick={() => {
-              const fileInput = document.getElementById("cover-file-input");
-              if (fileInput) fileInput.click();
+        {state?.error && (
+          <div
+            style={{
+              padding: "0.75rem 1rem",
+              background: "rgba(196,30,58,0.08)",
+              border: "1px solid rgba(196,30,58,0.2)",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--error)",
+              fontSize: "0.8125rem",
+              marginBottom: "1rem",
             }}
-          />
-
-          <input
-            id="cover-file-input"
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileUpload(e, true)}
-            style={{ display: "none" }}
-          />
-
-          <div style={{ maxWidth: 740, margin: "2rem auto" }}>
-            {/* Category */}
-            <div className="input-group">
-              <label htmlFor="category" className="input-label">
-                Category
-              </label>
-              <select
-                id="category"
-                name="category"
-                className="input"
-                defaultValue="campus"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Tags */}
-            <div className="input-group" style={{ marginTop: "1rem" }}>
-              <label htmlFor="tags" className="input-label">
-                Tags (comma-separated)
-              </label>
-              <input
-                id="tags"
-                name="tags"
-                type="text"
-                className="input"
-                placeholder="e.g. exam, library, seminar"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary btn-lg"
-              disabled={isPending}
-              style={{ width: "100%", marginTop: "2.5rem" }}
-            >
-              {isPending ? "Publishing..." : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Rocket size={20} /> Publish Post</span>}
-            </button>
+          >
+            {state.error}
           </div>
-        </form>
+        )}
+
+        <div className="animate-fade-in">
+          <form action={formAction}>
+            <input type="hidden" name="coverImageUrl" value={coverImage} />
+            <input type="hidden" name="title" value={title} />
+            <input type="hidden" name="content" value={content} />
+            <input
+              type="hidden"
+              name="mediaUrls"
+              value={JSON.stringify(mediaUrls)}
+            />
+
+            <DirectPreviewEditor
+              title={title}
+              onTitleChange={setTitle}
+              content={content}
+              onChange={setContent}
+              coverImage={coverImage}
+              onCoverImageClick={() => {
+                const fileInput = document.getElementById("cover-file-input");
+                if (fileInput) fileInput.click();
+              }}
+            />
+
+            <input
+              id="cover-file-input"
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFileUpload(e, true)}
+              style={{ display: "none" }}
+            />
+
+            <div style={{ maxWidth: 740, margin: "2rem auto" }}>
+              {/* Category */}
+              <div className="input-group">
+                <label htmlFor="category" className="input-label">
+                  Category
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  className="input"
+                  defaultValue="campus"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Tags */}
+              <div className="input-group" style={{ marginTop: "1rem" }}>
+                <label htmlFor="tags" className="input-label">
+                  Tags (comma-separated, no # needed)
+                </label>
+                <input
+                  id="tags"
+                  name="tags"
+                  type="text"
+                  className="input"
+                  placeholder="e.g. exam, library, seminar"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary btn-lg"
+                disabled={isPending}
+                style={{ width: "100%", marginTop: "2.5rem" }}
+              >
+                {isPending ? "Publishing..." : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Rocket size={20} /> Publish Post</span>}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

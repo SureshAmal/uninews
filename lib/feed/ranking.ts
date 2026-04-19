@@ -29,7 +29,8 @@ export interface RankedPost {
 export async function getRankedPosts(
   limit = 20,
   offset = 0,
-  category?: string
+  category?: string,
+  tag?: string
 ): Promise<RankedPost[]> {
   // Build conditions
   let conditions = and(
@@ -40,6 +41,10 @@ export async function getRankedPosts(
 
   if (category && category !== "all") {
     conditions = and(conditions, eq(posts.category, category));
+  }
+
+  if (tag) {
+    conditions = and(conditions, sql`${tag} = ANY(${posts.tags})`);
   }
 
   // Single query: join author + subqueries for engagement counts

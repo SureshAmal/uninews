@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/toast";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import Link from "next/link";
 
-export function AdminPostsClient({ data, search, category, status, page, sortBy, sortOrder }: any) {
+export function AdminPostsClient({ data, authors, tags, search, category, status, authorId, tag, page, sortBy, sortOrder }: any) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
@@ -117,6 +117,34 @@ export function AdminPostsClient({ data, search, category, status, page, sortBy,
           <option value="published">Published</option>
           <option value="draft">Draft</option>
           <option value="flagged">Flagged</option>
+        </select>
+
+        <select 
+            className="jira-filter-btn" 
+            value={authorId} 
+            onChange={(e) => updateFilters("authorId", e.target.value)}
+            style={{ maxWidth: "200px" }}
+        >
+          <option value="all">Author: All</option>
+          {authors.map((u: any) => (
+            <option key={u.id} value={u.id}>
+              @{u.username} ({u.displayName || u.username})
+            </option>
+          ))}
+        </select>
+
+        <select 
+            className="jira-filter-btn" 
+            value={tag} 
+            onChange={(e) => updateFilters("tag", e.target.value)}
+            style={{ maxWidth: "150px" }}
+        >
+          <option value="all">Tag: All</option>
+          {tags.map((t: string) => (
+            <option key={t} value={t}>
+              #{t}
+            </option>
+          ))}
         </select>
 
       </div>

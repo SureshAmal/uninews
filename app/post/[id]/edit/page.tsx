@@ -4,6 +4,7 @@ import { posts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/session";
 import { EditPostForm } from "./edit-form";
+import { BackButton } from "@/components/layout/back-button";
 
 export default async function EditPostPage({
   params,
@@ -24,39 +25,46 @@ export default async function EditPostPage({
   if (post.authorId !== user.userId) redirect("/");
 
   return (
-    <div className="container-news animate-fade-in" style={{ paddingTop: "2rem", paddingBottom: "4rem", maxWidth: 740, margin: "0 auto" }}>
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "2rem",
-          fontWeight: 700,
-          marginBottom: "0.5rem",
-        }}
+    <div className="container-news" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+      <BackButton />
+      
+      <div 
+        className="animate-fade-in" 
+        style={{ maxWidth: 740, margin: "2rem auto 0 auto" }}
       >
-        Edit Post
-      </h1>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "2rem",
-        }}
-      >
-        Update your story
-      </p>
+        <h1
+          style={{
+            fontFamily: "var(--font-heading)",
+            fontSize: "2rem",
+            fontWeight: 700,
+            marginBottom: "0.5rem",
+          }}
+        >
+          Edit Post
+        </h1>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "var(--text-tertiary)",
+            marginBottom: "2rem",
+          }}
+        >
+          Update your story
+        </p>
 
-      <EditPostForm
-        post={{
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          excerpt: post.excerpt,
-          category: post.category,
-          tags: post.tags,
-          coverImageUrl: post.coverImageUrl,
-          mediaUrls: post.mediaUrls,
-        }}
-      />
+        <EditPostForm
+          post={{
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            excerpt: post.excerpt,
+            category: post.category,
+            tags: post.tags,
+            coverImageUrl: post.coverImageUrl,
+            mediaUrls: post.mediaUrls,
+          }}
+        />
+      </div>
     </div>
   );
 }

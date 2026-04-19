@@ -9,6 +9,7 @@ import { ReviewInteraction } from "@/components/post/review-interaction";
 import { ReviewSection } from "@/components/post/review-section";
 import { CommentSection } from "@/components/post/comment-section";
 import { Pencil } from "lucide-react";
+import { PostActions } from "@/components/post/post-actions";
 import { BackButton } from "@/components/layout/back-button";
 import { getCategoryClass } from "@/lib/utils";
 import { PretextArticle } from "@/components/newspaper/pretext-article";
@@ -30,6 +31,7 @@ export default async function PostPage({
   await recordView(id);
 
   const isAuthor = user?.userId === post.author.id;
+  const isAdmin = user?.isAdmin || false;
   const publishDate = post.createdAt.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -128,12 +130,7 @@ export default async function PostPage({
           </Link>
 
           {isAuthor && (
-            <Link
-              href={`/post/${id}/edit`}
-              className="btn btn-secondary btn-sm"
-            >
-              <Pencil size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Edit
-            </Link>
+            <PostActions postId={id} isAuthor={isAuthor} isAdmin={isAdmin} />
           )}
         </div>
 
@@ -206,7 +203,6 @@ export default async function PostPage({
           <PretextArticle content={post.content} columnCount={1} />
         </div>
 
-        {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div
             style={{
@@ -217,18 +213,23 @@ export default async function PostPage({
             }}
           >
             {post.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
+                href={`/tag/${tag}`}
                 style={{
                   padding: "0.25rem 0.75rem",
                   fontSize: "0.75rem",
                   background: "var(--bg-tertiary)",
+                  border: "1px solid var(--border-color)",
                   borderRadius: 100,
                   color: "var(--text-secondary)",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease"
                 }}
+                className="tag-pill-hover"
               >
                 #{tag}
-              </span>
+              </Link>
             ))}
           </div>
         )}
