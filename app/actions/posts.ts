@@ -161,11 +161,17 @@ export async function deletePost(postId: string) {
     .where(eq(posts.id, postId))
     .limit(1);
 
-  if (!existing || existing.authorId !== user.userId) {
+  if (!existing) return { error: "Post not found" };
+
+  // Permission Logic: Author soft-deletes, Admin hard-deletes
+  if (user.isAdmin) {
+    await db.delete(posts).where(eq(posts.id, postId));
+  } else if (existing.authorId === user.userId) {
+    await db.update(posts).set({ isDeleted: true }).where(eq(posts.id, postId));
+  } else {
     return { error: "Not authorized" };
   }
 
-  await db.delete(posts).where(eq(posts.id, postId));
   redirect("/");
 }
 

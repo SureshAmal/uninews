@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { getRankedFeed } from "@/app/actions/posts";
+import { deletePost, getRankedFeed } from "@/app/actions/posts";
 import type { RankedPost } from "@/lib/feed/ranking";
 import { PretextArticle } from "./pretext-article";
 import { prepare, layout } from "@chenglou/pretext";
 import { stripHtml } from "@/lib/utils";
+import { Trash2, Edit2 } from "lucide-react";
 
 // Configuration for the broadsheet grid
 const ROW_HEIGHT = 5; // 5px row slices for fine-grained packing
@@ -14,9 +15,10 @@ const GAP_PX = 40; // 2.5rem
 const COL_COUNT = 12;
 
 // Helper component for each article to auto-correct its height perfectly.
-function FeedArticle({ post }: { post: any }) {
+function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
   const innerRef = useRef<HTMLDivElement>(null);
   const [actualRowSpan, setActualRowSpan] = useState<number>(post.rowSpan);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!innerRef.current) return;
@@ -41,6 +43,15 @@ function FeedArticle({ post }: { post: any }) {
     return () => obs.disconnect();
   }, [actualRowSpan]);
 
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this edition? This cannot be undone.")) return;
+    setIsDeleting(true);
+    await deletePost(post.id);
+    setIsDeleting(false);
+  };
+
+  const isAuthor = currentUser?.userId === post.authorId;
+
   return (
     <article 
       className="animate-fade-in"
@@ -50,10 +61,52 @@ function FeedArticle({ post }: { post: any }) {
         borderBottom: "1px solid var(--border-color)",
         paddingBottom: "1rem",
         marginBottom: "0.5rem",
-        alignSelf: "start" // Prevents the article from stretching to fill a gap!
+        alignSelf: "start",
+        position: "relative",
+        opacity: isDeleting ? 0.5 : 1,
+        pointerEvents: isDeleting ? "none" : "auto"
       }}
     >
       <div ref={innerRef} style={{ display: "flex", flexDirection: "column" }}>
+        {/* Author Controls */}
+        {isAuthor && (
+          <div style={{ 
+              display: "flex", 
+              gap: "0.75rem", 
+              position: "absolute", 
+              top: "-0.5rem", 
+              right: 0, 
+              zIndex: 10,
+              background: "var(--bg-primary)",
+              padding: "0.25rem 0.5rem",
+              borderRadius: "4px",
+              border: "1px solid var(--border-color)",
+              boxShadow: "var(--shadow-sm)"
+          }}>
+            <Link 
+                href={`/post/${post.id}/edit`} 
+                title="Edit Post"
+                style={{ color: "var(--text-secondary)", display: "flex", alignItems: "center" }}
+            >
+              <Edit2 size={14} />
+            </Link>
+            <button 
+                onClick={handleDelete}
+                title="Delete Post"
+                style={{ 
+                    background: "none", 
+                    border: "none", 
+                    cursor: "pointer", 
+                    color: "var(--error)", 
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center"
+                }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
         {post.coverImageUrl && (
           <div style={{ marginBottom: "1rem", height: post.imageHeight, overflow: "hidden" }}>
             <Link href={`/post/${post.id}`}>
@@ -95,7 +148,7 @@ function FeedArticle({ post }: { post: any }) {
   );
 }
 
-export function NewspaperFeed({ initialPosts }: { initialPosts: RankedPost[] }) {
+export function NewspaperFeed({ initialPosts, currentUser }: { initialPosts: RankedPost[], currentUser: any }) {
   const [posts, setPosts] = useState<RankedPost[]>(initialPosts);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= 10);
@@ -150,62 +203,136 @@ export function NewspaperFeed({ initialPosts }: { initialPosts: RankedPost[] }) 
     try {
       const isMobile = feedWidth < 640;
       const isTablet = feedWidth >= 640 && feedWidth < 1024;
-      const responsiveGap = isMobile ? 12 : 40; // Narrower gaps on mobile to prevent overflow
+      const responsiveGap = isMobile ? 12 : 40; 
 
-      const metrics = posts.map((post, i) => {
+      // Greedy row balancing algorithm
+      const metrics: (RankedPost & { colSpan: number, rowSpan: number, textColumns: number, imageHeight: number, gap?: number })[] = [];
+      let currentRow: number[] = [];
+      let currentSum = 0;
+
+      const processRow = (indices: number[], isLastRow: boolean) => {
+        let remaining = 12 - currentSum;
+        
+        // Distribution: Add remaining columns to the most "important" (longest) post or last post
+        if (remaining > 0 && !isMobile) {
+            const lastIdx = indices[indices.length - 1];
+            // Just give it to the last one for a clean right edge
+            // Or if it's the only one, it takes all 12
+            const target = metrics.find((_, i) => indices.includes(i) && metrics[i].id === posts[lastIdx].id);
+            // Wait, metrics isn't fully populated yet. Let's do this in a post-process or within the loop.
+        }
+      };
+
+      // Refined loop: Calculate spans AND balance rows
+      const postsToProcess = [...posts];
+      let i = 0;
+      while (i < postsToProcess.length) {
+        const post = postsToProcess[i];
         const contentLength = post.content.length;
         const hasImage = !!post.coverImageUrl;
         
         let colSpan = 4;
-        if (isMobile) {
-          colSpan = 12; // Full width on mobile
-        } else if (isTablet) {
-          if (i === 0) colSpan = 12; // Lead story full width
-          else colSpan = 6; // 2 per row
-        } else {
-          // Desktop
-          if (i === 0 && contentLength > 300) colSpan = 8;
-          else if (contentLength > 1000) colSpan = 6;
-          else if (contentLength < 200 && !hasImage) colSpan = 3;
+        if (isMobile) colSpan = 12;
+        else if (isTablet) colSpan = (i === 0) ? 12 : 6;
+        else {
+            if (i === 0 && contentLength > 300) colSpan = 8;
+            else if (contentLength > 1000) colSpan = 6;
+            else if (contentLength < 300 && !hasImage) colSpan = 3;
+            else colSpan = 4;
+        }
+
+        // Row completion logic
+        if (!isMobile && currentSum + colSpan > 12) {
+            // This post starts a new row. Balance the PREVIOUS row.
+            const remainder = 12 - currentSum;
+            if (remainder > 0 && currentRow.length > 0) {
+                const lastProcessedIdx = metrics.length - 1;
+                metrics[lastProcessedIdx].colSpan += remainder;
+            }
+            currentSum = 0;
+            currentRow = [];
+        }
+
+        const textColumns = isMobile ? 1 : (colSpan > 4 ? 2 : 1);
+        const totalGapsWidth = responsiveGap * (COL_COUNT - 1);
+        const singleColWidth = Math.max(1, (feedWidth - totalGapsWidth) / COL_COUNT);
+        
+        // Use a "deferred" height calculation that we'll update in FeedArticle's ResizeObserver
+        // but provide a good static estimate here for Pretext.
+        const estHeight = 400; 
+
+        metrics.push({
+          ...post,
+          colSpan,
+          rowSpan: Math.ceil(estHeight / ROW_HEIGHT),
+          textColumns,
+          imageHeight: 0, // Calculated in component based on final colSpan
+          gap: responsiveGap
+        });
+
+        currentSum += colSpan;
+        currentRow.push(i);
+        
+        // If it's 12, row is perfect.
+        if (currentSum >= 12) {
+            currentSum = 0;
+            currentRow = [];
         }
         
-        const textColumns = isMobile ? 1 : (colSpan > 4 ? 2 : 1);
+        i++;
+      }
+
+      // Final row cleanup
+      if (currentSum > 0 && currentSum < 12 && !isMobile) {
+          metrics[metrics.length - 1].colSpan += (12 - currentSum);
+      }
+
+      // Second pass: Finalize heights and column counts now that colSpans are balanced
+      const finalizedMetrics = metrics.map((m) => {
+        const hasImage = !!m.coverImageUrl;
+        // High-fidelity newspaper column math: roughly 3 grid columns per 1 text column
+        const textColumns = isMobile ? 1 : 
+                           m.colSpan >= 12 ? 4 : 
+                           m.colSpan >= 8 ? 3 : 
+                           m.colSpan >= 6 ? 2 : 1;
         
         const totalGapsWidth = responsiveGap * (COL_COUNT - 1);
         const singleColWidth = Math.max(1, (feedWidth - totalGapsWidth) / COL_COUNT);
-        const totalArticleWidth = Math.max(100, (singleColWidth * colSpan) + (responsiveGap * (colSpan - 1)));
-        const textColWidth = Math.max(100, (totalArticleWidth - (textColumns > 1 ? responsiveGap : 0)) / textColumns);
+        const totalArticleWidth = Math.max(100, (singleColWidth * m.colSpan) + (responsiveGap * (m.colSpan - 1)));
+        const textColWidth = Math.max(100, (totalArticleWidth - (textColumns > 1 ? (m.gap || 40) : 0)) / textColumns);
 
         const titleFont = `800 24px "Playfair Display"`; 
         const bodyFont = `400 17px "Inter"`;
         const bodyLineHeight = 27.2; 
         const titleLineHeight = 30;
         
-        const preparedTitle = prepare(post.title, titleFont, { whiteSpace: "pre-wrap" });
+        const preparedTitle = prepare(m.title, titleFont, { whiteSpace: "pre-wrap" });
         const titleHeight = layout(preparedTitle, totalArticleWidth, titleLineHeight).height;
 
-        const plainTextBody = stripHtml(post.content);
+        const plainTextBody = stripHtml(m.content);
         const preparedBody = prepare(plainTextBody, bodyFont, { whiteSpace: "pre-wrap" });
         const bodyHeight = layout(preparedBody, textColWidth, bodyLineHeight).height / textColumns;
 
-        const imgRatio = isMobile ? 0.5625 : (colSpan > 8 ? 0.5 : 0.65); // 16:9 on mobile
-        const imageHeight = hasImage ? (totalArticleWidth * imgRatio) : 0; 
-        const extraHeight = 50; 
+        const imgRatio = isMobile ? 0.5625 : (m.colSpan >= 12 ? 0.35 : m.colSpan > 8 ? 0.45 : 0.65);
+        let imageHeight = hasImage ? (totalArticleWidth * imgRatio) : 0; 
+        
+        // Cap image height to prevent dominance on ultra-wide screens
+        if (!isMobile && imageHeight > 500) imageHeight = 500;
+        
+        const extraHeight = 60; 
 
         const totalHeightPx = titleHeight + bodyHeight + imageHeight + extraHeight;
         const rowSpan = Math.min(1500, Math.ceil(totalHeightPx / ROW_HEIGHT));
 
         return {
-          ...post,
-          colSpan,
-          rowSpan,
+          ...m,
           textColumns,
           imageHeight: Math.floor(imageHeight),
-          gap: responsiveGap
+          rowSpan
         };
       });
 
-      setPostsWithMetrics(metrics);
+      setPostsWithMetrics(finalizedMetrics);
     } catch (err) {
       console.error("Layout math failed:", err);
     }
@@ -225,7 +352,7 @@ export function NewspaperFeed({ initialPosts }: { initialPosts: RankedPost[] }) 
         }}
       >
         {postsWithMetrics.map((post) => (
-          <FeedArticle key={post.id} post={post} />
+          <FeedArticle key={post.id} post={post} currentUser={currentUser} />
         ))}
       </div>
 

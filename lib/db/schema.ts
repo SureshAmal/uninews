@@ -50,6 +50,7 @@ export const posts = pgTable(
     isPublished: boolean("is_published").default(true).notNull(),
     isFlagged: boolean("is_flagged").default(false).notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
+    isDeleted: boolean("is_deleted").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     editedAt: timestamp("edited_at"),

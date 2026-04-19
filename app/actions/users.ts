@@ -83,7 +83,7 @@ export async function getUserProfile(username: string) {
   const userPosts = await db
     .select()
     .from(posts)
-    .where(and(eq(posts.authorId, user.id), eq(posts.isPublished, true)))
+    .where(and(eq(posts.authorId, user.id), eq(posts.isPublished, true), eq(posts.isDeleted, false)))
     .orderBy(desc(posts.createdAt))
     .limit(20);
 

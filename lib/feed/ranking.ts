@@ -34,7 +34,8 @@ export async function getRankedPosts(
   // Build conditions
   let conditions = and(
     eq(posts.isPublished, true),
-    eq(posts.isFlagged, false)
+    eq(posts.isFlagged, false),
+    eq(posts.isDeleted, false)
   );
 
   if (category && category !== "all") {

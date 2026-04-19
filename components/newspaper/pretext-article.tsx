@@ -257,7 +257,7 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         }
     });
 
-    return { renderedLines, colWidth, placedObstacles, maxHeight, metadataMap };
+    return { renderedLines, colWidth, placedObstacles, maxHeight, metadataMap, items };
   }, [content, containerWidth, columnCount]);
 
   return (
@@ -312,19 +312,20 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
         >
           {line.fragments.map((f: any, fi: number) => {
             const meta = layoutData.metadataMap[f.itemIndex] || {};
+            const itemFont = layoutData.items[f.itemIndex]?.font || "400 17px Georgia";
             const style = { 
-                font: f.font,
+                font: meta.isPill ? itemFont.replace("17px", "14px") : itemFont,
                 color: meta.color || "inherit",
                 background: meta.background || "none",
                 padding: meta.isPill ? "2px 8px" : "0",
                 borderRadius: meta.isPill ? "100px" : "0",
                 fontWeight: meta.fontWeight || "inherit",
                 textDecoration: meta.textDecoration || "none",
-                marginLeft: f.gapBefore + "px", // RESTORE THE SPACING
+                marginLeft: f.gapBefore + "px", 
                 display: "inline-block",
                 lineHeight: "1.2",
                 alignSelf: "center",
-                ...(meta.isPill ? { fontSize: "0.85em", transform: "translateY(-1px)" } : {})
+                transform: meta.isPill ? "translateY(-1px)" : "none"
             };
 
             if (meta.isInlineImage) {

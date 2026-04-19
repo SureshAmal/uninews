@@ -22,7 +22,7 @@ export default async function HomePage() {
   const user = await getCurrentUser();
 
   return (
-    <div style={{ width: "100%", padding: "1rem 2rem 3rem 2rem" }}>
+    <div style={{ width: "100%", padding: "1rem clamp(1rem, 5vw, 3rem) 4rem clamp(1rem, 5vw, 3rem)" }}>
       {/* Newspaper Masthead */}
       <Masthead />
 
@@ -99,7 +99,7 @@ export default async function HomePage() {
         </div>
       ) : (
         <div style={{ marginTop: "2rem" }}>
-          <NewspaperFeed initialPosts={posts} />
+          <NewspaperFeed initialPosts={posts} currentUser={user} />
         </div>
       )}
     </div>
