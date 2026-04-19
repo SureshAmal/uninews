@@ -24,15 +24,7 @@ export default async function EditPostPage({
   if (post.authorId !== user.userId) redirect("/");
 
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{
-        paddingTop: "2rem",
-        paddingBottom: "4rem",
-        maxWidth: 740,
-        margin: "0 auto",
-      }}
-    >
+    <div className="container-news animate-fade-in" style={{ paddingTop: "2rem", paddingBottom: "4rem", maxWidth: 740, margin: "0 auto" }}>
       <h1
         style={{
           fontFamily: "var(--font-heading)",

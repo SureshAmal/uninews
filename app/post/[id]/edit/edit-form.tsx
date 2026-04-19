@@ -1,9 +1,11 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { updatePost, type PostState } from "@/app/actions/posts";
-import { RichTextEditor } from "@/components/editor/rich-text-editor";
+import { uploadFile } from "@/app/actions/upload";
+import { DirectPreviewEditor } from "@/components/editor/direct-preview-editor";
 import { Save } from "lucide-react";
+import { toast } from "@/components/ui/toast";
 
 interface EditPostFormProps {
   post: {
@@ -33,8 +35,31 @@ export function EditPostForm({ post }: EditPostFormProps) {
     boundUpdate,
     null
   );
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
+  const [title, setTitle] = useState(post.title || "");
+  const [content, setContent] = useState(post.content || "");
+  const [coverImage, setCoverImage] = useState(post.coverImageUrl || "");
+  const [uploading, startUpload] = useTransition();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.warning("File too large", "File exceeds the 10MB limit.");
+      return;
+    }
+
+    startUpload(async () => {
+      const formData = new FormData();
+      formData.set("file", file);
+      const result = await uploadFile(formData);
+      if (result.url) {
+        setCoverImage(result.url);
+      } else if (result.error) {
+        toast.error("Upload failed", result.error);
+      }
+    });
+  };
 
   return (
     <>
@@ -58,35 +83,36 @@ export function EditPostForm({ post }: EditPostFormProps) {
         <input
           type="hidden"
           name="coverImageUrl"
-          value={post.coverImageUrl || ""}
+          value={coverImage}
         />
+        <input type="hidden" name="title" value={title} />
+        <input type="hidden" name="content" value={content} />
         <input
           type="hidden"
           name="mediaUrls"
           value={JSON.stringify(post.mediaUrls || [])}
         />
 
-        <div style={{ display: "grid", gap: "1rem" }}>
-          <div className="input-group">
-            <label htmlFor="title" className="input-label">
-              Headline *
-            </label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              className="input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "1.25rem",
-                fontWeight: 600,
-              }}
-            />
-          </div>
+        <DirectPreviewEditor 
+          title={title}
+          onTitleChange={setTitle}
+          content={content}
+          onChange={setContent}
+          coverImage={coverImage}
+          onCoverImageClick={() => {
+            document.getElementById("cover-file-input")?.click();
+          }}
+        />
 
+        <input
+          id="cover-file-input"
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          style={{ display: "none" }}
+        />
+
+        <div style={{ maxWidth: 740, margin: "2rem auto", display: "grid", gap: "1.5rem" }}>
           <div className="input-group">
             <label htmlFor="category" className="input-label">
               Category
@@ -103,18 +129,6 @@ export function EditPostForm({ post }: EditPostFormProps) {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="content" className="input-label">
-              Story *
-            </label>
-            <input type="hidden" name="content" value={content} />
-            <RichTextEditor
-              content={content}
-              onChange={setContent}
-              placeholder="Write your story here..."
-            />
           </div>
 
           <div className="input-group">

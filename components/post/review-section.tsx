@@ -61,62 +61,6 @@ export function ReviewSection({
         </div>
       </div>
 
-      {/* Submit review */}
-      {isLoggedIn && !submitted ? (
-        <form action={handleSubmit}>
-          <div style={{ marginBottom: "0.75rem" }}>
-            <span
-              style={{
-                fontSize: "0.8125rem",
-                fontWeight: 500,
-                color: "var(--text-secondary)",
-                display: "block",
-                marginBottom: "0.375rem",
-              }}
-            >
-              Rate this post:
-            </span>
-            <div className="star-rating">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  className={`star ${star <= (hoverRating || selectedRating) ? "filled" : ""}`}
-                  onClick={() => setSelectedRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                >
-                  <Star size={24} fill={star <= (hoverRating || selectedRating) ? "currentColor" : "none"} />
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="input-group" style={{ marginBottom: "0.75rem" }}>
-            <textarea
-              name="reason"
-              className="input"
-              placeholder="Optional: share your thoughts..."
-              style={{ minHeight: 80 }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-secondary btn-sm"
-            disabled={isPending || selectedRating === 0}
-          >
-            {isPending ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
-      ) : submitted ? (
-        <p className="review-success-p">
-          <CheckCircle size={16} /> Review submitted! Thank you for your feedback.
-        </p>
-      ) : (
-        <p className="review-login-prompt">
-          Log in to leave a review.
-        </p>
-      )}
     </div>
   );
 }

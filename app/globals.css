@@ -1175,3 +1175,103 @@ textarea.input {
 .jira-table-row-selected:hover td {
   background: rgba(37,99,235,0.08);
 }
+
+/* ─── Rich Media Content ────────────────────────────────────────── */
+.rich-text-content .resizable-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 1.5rem 0;
+  transition: box-shadow 0.2s;
+}
+
+.rich-text-content .align-left {
+  float: left;
+  margin-right: 2rem;
+  margin-bottom: 1rem;
+}
+
+.rich-text-content .align-right {
+  float: right;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.rich-text-content .align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .rich-text-content .align-left,
+  .rich-text-content .align-right {
+    float: none;
+    margin: 1.5rem 0;
+    width: 100% !important;
+  }
+}
+
+.sticker-wrapper {
+  display: inline-flex;
+  vertical-align: middle;
+  line-height: 1;
+  user-select: none;
+}
+
+.reference-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.reference-link:hover {
+  opacity: 0.8;
+}
+
+/* ─── Loading Spinner ────────────────────────────────────────── */
+.spinner-sm {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── View Transitions ─────────────────────────────────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  animation: circle-reveal 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes circle-reveal {
+  from {
+    clip-path: circle(0% at var(--x) var(--y));
+  }
+  to {
+    clip-path: circle(150% at var(--x) var(--y));
+  }
+}
+
+/* Fallback for theme change speed */
+html {
+  view-transition-name: root;
+}

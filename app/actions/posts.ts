@@ -64,8 +64,8 @@ export async function createPost(
 
   // Sanitize HTML content to prevent XSS
   const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'class', 'style', 'name'],
   });
 
   const [post] = await db
@@ -129,8 +129,8 @@ export async function updatePost(
 
   // Sanitize HTML content to prevent XSS
   const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'class', 'style', 'name'],
   });
 
   await db

@@ -5,11 +5,13 @@ import { getPostReviews } from "@/app/actions/reviews";
 import { getComments } from "@/app/actions/comments";
 import { getCurrentUser } from "@/lib/auth/session";
 import { EngagementBar } from "@/components/post/engagement-bar";
+import { ReviewInteraction } from "@/components/post/review-interaction";
 import { ReviewSection } from "@/components/post/review-section";
 import { CommentSection } from "@/components/post/comment-section";
 import { Pencil } from "lucide-react";
 import { BackButton } from "@/components/layout/back-button";
 import { getCategoryClass } from "@/lib/utils";
+import { PretextArticle } from "@/components/newspaper/pretext-article";
 
 export default async function PostPage({
   params,
@@ -135,6 +137,8 @@ export default async function PostPage({
           )}
         </div>
 
+
+
         {/* Cover Image */}
         {post.coverImageUrl && (
           <div
@@ -197,16 +201,10 @@ export default async function PostPage({
           </div>
         )}
 
-        {/* Content */}
-        <div
-          className="rich-text-content"
-          style={{
-            fontSize: "1.125rem",
-            lineHeight: 1.8,
-            color: "var(--text-secondary)",
-          }}
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        {/* Content - Single Column reading view (matches editor) */}
+        <div style={{ marginTop: "2rem" }}>
+          <PretextArticle content={post.content} columnCount={1} />
+        </div>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
@@ -250,13 +248,21 @@ export default async function PostPage({
           />
         </div>
 
-        {/* Reviews */}
-        <ReviewSection
+        {/* Reviews Aggregate List Footer (Optionally simplified) */}
+        {/* <ReviewSection
           postId={id}
           avgRating={reviewData.avgRating}
           reviewCount={reviewData.reviewCount}
           isLoggedIn={!!user}
-        />
+        /> */}
+        {/* Review Summary (New Top Placement) */}
+        {/* <ReviewInteraction
+          postId={id}
+          postTitle={post.title}
+          avgRating={reviewData.avgRating}
+          reviewCount={reviewData.reviewCount}
+          isLoggedIn={!!user}
+        /> */}
 
         {/* Comments */}
         <CommentSection
@@ -265,6 +271,7 @@ export default async function PostPage({
           isLoggedIn={!!user}
           currentUserId={user?.userId}
         />
+
       </article>
     </div>
   );

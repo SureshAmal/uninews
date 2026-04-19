@@ -3,6 +3,8 @@
 import { X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
+import { PretextArticle } from "@/components/newspaper/pretext-article";
+
 export function PostPreviewModal({ 
   post, 
   onClose 
@@ -77,10 +79,9 @@ export function PostPreviewModal({
           )}
 
           {/* Content */}
-          <div 
-            className="p-8 rich-text-content leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <div className="p-8 rich-text-content leading-relaxed">
+            <PretextArticle content={post.content} columnCount={1} />
+          </div>
         </div>
       </div>
     </div>
