@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { comments, users } from "@/lib/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { eq, asc, count } from "drizzle-orm";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 export async function addComment(postId: string, formData: FormData) {
   const user = await getCurrentUser();
@@ -16,8 +16,8 @@ export async function addComment(postId: string, formData: FormData) {
 
   const parentId = (formData.get("parentId") as string) || null;
 
-  // Sanitize
-  const sanitized = DOMPurify.sanitize(content, { ALLOWED_TAGS: [] }); // plain text only
+  // Sanitize to plain text only for comments
+  const sanitized = sanitizeHtml(content, { allowedTags: [], allowedAttributes: {} });
 
   const [comment] = await db
     .insert(comments)

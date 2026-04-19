@@ -14,7 +14,7 @@ import { getRankedPosts } from "@/lib/feed/ranking";
 import { eq, and, desc, sql, count } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import * as z from "zod";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { stripHtml } from "@/lib/utils";
 
 const PostSchema = z.object({
@@ -62,10 +62,23 @@ export async function createPost(
   const mediaUrlsRaw = formData.get("mediaUrls") as string;
   const mediaUrls = mediaUrlsRaw ? JSON.parse(mediaUrlsRaw) : null;
 
-  // Sanitize HTML content to prevent XSS
-  const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'class', 'style', 'name'],
+  // Sanitize HTML content to prevent XSS. 
+  // We use sanitize-html instead of DOMPurify for better Vercel/Next.js compatibility.
+  const sanitizedContent = sanitizeHtml(parsed.data.content, {
+    allowedTags: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
+    allowedAttributes: {
+      '*': ['class', 'style', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'name'],
+      'a': ['href', 'target', 'rel'],
+      'img': ['src', 'alt', 'width', 'height']
+    },
+    // Required to support inline styles (like text colors, alignment) from Tiptap
+    allowedStyles: {
+      '*': {
+        'color': [/^.*/],
+        'text-align': [/^.*/],
+        'font-family': [/^.*/]
+      }
+    }
   });
 
   const [post] = await db
@@ -128,9 +141,20 @@ export async function updatePost(
   const mediaUrls = mediaUrlsRaw ? JSON.parse(mediaUrlsRaw) : existing.mediaUrls;
 
   // Sanitize HTML content to prevent XSS
-  const sanitizedContent = DOMPurify.sanitize(parsed.data.content, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'class', 'style', 'name'],
+  const sanitizedContent = sanitizeHtml(parsed.data.content, {
+    allowedTags: ['p', 'br', 'strong', 'em', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a', 'code', 'pre', 'img', 'span'],
+    allowedAttributes: {
+      '*': ['class', 'style', 'align', 'data-align', 'data-width', 'data-sticker', 'data-pill', 'name'],
+      'a': ['href', 'target', 'rel'],
+      'img': ['src', 'alt', 'width', 'height']
+    },
+    allowedStyles: {
+      '*': {
+        'color': [/^.*/],
+        'text-align': [/^.*/],
+        'font-family': [/^.*/]
+      }
+    }
   });
 
   await db

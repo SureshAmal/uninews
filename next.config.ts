@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-
   },
-  serverExternalPackages: ["isomorphic-dompurify"],
   images: {
     remotePatterns: [
       {
