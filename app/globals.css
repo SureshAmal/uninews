@@ -1093,6 +1093,7 @@ textarea.input {
   padding: 0.5rem 1rem;
   margin-left: -1rem;
   margin-bottom: 1rem;
+  margin-top: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-tertiary);

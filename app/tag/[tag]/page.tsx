@@ -29,7 +29,7 @@ export default async function TagPage({
           </p>
         </header>
 
-        <NewspaperFeed initialPosts={initialPosts} currentUser={user} tagFilter={decodedTag} />
+        <NewspaperFeed initialPosts={initialPosts} currentUser={user} tagFilter={decodedTag} isSimplified={true} />
       </div>
     </main>
   );

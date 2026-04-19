@@ -98,7 +98,7 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
   );
 }
 
-export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initialPosts: RankedPost[], currentUser: any, tagFilter?: string }) {
+export function NewspaperFeed({ initialPosts, currentUser, tagFilter, isSimplified }: { initialPosts: RankedPost[], currentUser: any, tagFilter?: string, isSimplified?: boolean }) {
   const [posts, setPosts] = useState<RankedPost[]>(initialPosts);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length >= 10);
@@ -183,8 +183,11 @@ export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initia
         
         let colSpan = 4;
         if (isMobile) colSpan = 12;
-        else if (isTablet) colSpan = (i === 0) ? 12 : 6;
-        else {
+        else if (isTablet) colSpan = (i === 0 && !isSimplified) ? 12 : 6;
+        else if (isSimplified) {
+            // Simplified layout: alternating 12 and 6-6 for a clean vertical rhythm
+            colSpan = 6;
+        } else {
             if (i === 0 && contentLength > 300) colSpan = 8;
             else if (contentLength > 1000) colSpan = 6;
             else if (contentLength < 300 && !hasImage) colSpan = 3;
@@ -240,15 +243,24 @@ export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initia
       // Second pass: Finalize heights and column counts now that colSpans are balanced
       const finalizedMetrics = metrics.map((m) => {
         const hasImage = !!m.coverImageUrl;
+        const totalGapsWidth = responsiveGap * (COL_COUNT - 1);
+        const singleColWidth = Math.max(1, (feedWidth - totalGapsWidth) / COL_COUNT);
+        const totalArticleWidth = Math.max(100, (singleColWidth * m.colSpan) + (responsiveGap * (m.colSpan - 1)));
+
         // High-fidelity newspaper column math: roughly 3 grid columns per 1 text column
-        const textColumns = isMobile ? 1 : 
+        // NEW SANITY CHECK: Only split columns if they have a minimum readable width of 260px each
+        let textColumns = isMobile ? 1 : 
                            m.colSpan >= 12 ? 4 : 
                            m.colSpan >= 8 ? 3 : 
                            m.colSpan >= 6 ? 2 : 1;
         
-        const totalGapsWidth = responsiveGap * (COL_COUNT - 1);
-        const singleColWidth = Math.max(1, (feedWidth - totalGapsWidth) / COL_COUNT);
-        const totalArticleWidth = Math.max(100, (singleColWidth * m.colSpan) + (responsiveGap * (m.colSpan - 1)));
+        // NEW CONTENT CHECK: If the text is short, don't split it into columns
+        if (m.content.length < 400) {
+            textColumns = 1;
+        } else if (textColumns > 1 && (totalArticleWidth / textColumns) < 260) {
+            textColumns = Math.max(1, Math.floor(totalArticleWidth / 260));
+        }
+        
         const textColWidth = Math.max(100, (totalArticleWidth - (textColumns > 1 ? (m.gap || 40) : 0)) / textColumns);
 
         const titleFont = `800 24px "Playfair Display"`; 
