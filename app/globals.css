@@ -25,8 +25,13 @@
   --accent-text: #c41e3a;
 
   --success: #2d8a4e;
+  --success-soft: rgba(45, 138, 78, 0.1);
   --warning: #d4920a;
+  --warning-soft: rgba(212, 146, 10, 0.1);
   --error: #c41e3a;
+  --error-soft: rgba(196, 30, 58, 0.1);
+  --info: #2563eb;
+  --info-soft: rgba(37, 99, 235, 0.1);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -69,6 +74,15 @@
   --accent-hover: #f07088;
   --accent-soft: rgba(232, 93, 117, 0.12);
   --accent-text: #e85d75;
+
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.15);
+  --error: #f87171;
+  --error-soft: rgba(248, 113, 113, 0.15);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.15);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -1091,4 +1105,73 @@ textarea.input {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+/* ─── Jira-Style Tables ────────────────────────────────────────── */
+.jira-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.jira-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+.jira-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.jira-filter-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-tertiary);
+}
+.jira-table-container {
+  width: 100%;
+  overflow-x: auto;
+  background: var(--bg-card);
+}
+.jira-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.jira-table th {
+  padding: 0.375rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  border-bottom: 2px solid var(--border-light);
+  background: var(--bg-card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.jira-table td {
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+.jira-table tr:hover td {
+  background: var(--bg-hover);
+}
+.jira-table-row-selected td {
+  background: rgba(37,99,235,0.05);
+}
+.jira-table-row-selected:hover td {
+  background: rgba(37,99,235,0.08);
 }

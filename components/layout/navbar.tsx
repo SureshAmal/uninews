@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { logout } from "@/app/actions/auth";
-import { PenLine, User, Settings, LogOut, Bookmark } from "lucide-react";
+import { PenLine, User, Settings, LogOut, Bookmark, Shield } from "lucide-react";
 
 interface NavUser {
   userId: string;
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  isAdmin?: boolean;
 }
 
 export function Navbar({ user }: { user: NavUser | null }) {
@@ -231,6 +232,22 @@ export function Navbar({ user }: { user: NavUser | null }) {
                       >
                         <Bookmark size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Saved
                       </Link>
+                      {user.isAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          style={{
+                            display: "block",
+                            padding: "0.5rem 0.75rem",
+                            fontSize: "0.875rem",
+                            color: "var(--accent)",
+                            textDecoration: "none",
+                            borderRadius: "var(--radius-sm)",
+                          }}
+                        >
+                          <Shield size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Admin Panel
+                        </Link>
+                      )}
                       <form action={logout}>
                         <button
                           type="submit"

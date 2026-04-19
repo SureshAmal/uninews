@@ -1,61 +1,87 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 export function PostPreviewModal({ 
   post, 
   onClose 
 }: { 
-  post: { title: string; authorUsername: string; content: string; createdAt: Date } | null;
+  post: { 
+    title: string; 
+    authorUsername: string; 
+    content: string; 
+    createdAt: Date;
+    coverImageUrl?: string | null;
+    mediaUrls?: { url: string; type: string }[] | null;
+  } | null;
   onClose: () => void;
 }) {
   if (!post) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(4px)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem"
-      }}
-      onClick={onClose}
-    >
+    <div className="admin-centered-modal-overlay" onClick={onClose}>
       <div
-        className="card animate-slide-up"
-        style={{
-          width: "100%",
-          maxWidth: "700px",
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden"
-        }}
+        className="admin-preview-modal-content animate-slide-up max-w-[800px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: "1.5rem", borderBottom: "1px solid var(--border-light)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="admin-modal-header p-6 border-b border-light flex justify-between items-start">
           <div>
-            <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 700, margin: "0 0 0.5rem 0" }}>{post.title}</h2>
-            <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--text-tertiary)" }}>
+            <h2 className="admin-modal-title mb-2">{post.title}</h2>
+            <p className="m-0 text-[0.875rem] text-tertiary">
               By @{post.authorUsername} • {new Date(post.createdAt).toLocaleDateString()}
             </p>
           </div>
           <button onClick={onClose} className="btn btn-ghost btn-icon">
-            <X size={20} />
+            <X size={24} />
           </button>
         </div>
         
-        <div 
-          className="rich-text-content"
-          style={{ padding: "1.5rem", overflowY: "auto", flex: 1 }}
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="admin-preview-modal-body p-0 overflow-y-auto max-h-[70vh]">
+          {/* Cover Image */}
+          {post.coverImageUrl && (
+            <div className="w-full aspect-video relative border-b border-light bg-black">
+              <Image 
+                src={post.coverImageUrl} 
+                alt="Cover" 
+                fill 
+                className="object-contain" 
+                unoptimized
+              />
+            </div>
+          )}
+
+          {/* Media Gallery */}
+          {post.mediaUrls && post.mediaUrls.length > 0 && (
+            <div className="p-6 border-b border-light bg-accent-soft/30">
+              <div className="flex items-center gap-2 mb-4 text-accent">
+                <ImageIcon size={16} />
+                <span className="text-xs font-bold uppercase tracking-wider">Attachment Gallery ({post.mediaUrls.length})</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {post.mediaUrls
+                  .filter(item => item.type === "image" && item.url)
+                  .map((item, i) => (
+                  <div key={i} className="aspect-square relative rounded-md overflow-hidden border border-border-color bg-card shadow-sm hover:ring-2 hover:ring-accent transition-all">
+                    <Image 
+                      src={item.url} 
+                      alt={`Attachment ${i+1}`} 
+                      fill 
+                      className="object-cover" 
+                      unoptimized 
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Content */}
+          <div 
+            className="p-8 rich-text-content leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </div>
       </div>
     </div>
   );

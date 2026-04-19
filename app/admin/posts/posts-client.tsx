@@ -1,131 +1,261 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Eye, Filter, EyeOff } from "lucide-react";
-import { togglePostStatus } from "@/app/actions/admin";
+import { useState, useEffect } from "react";
+import { Search, Eye, Filter, EyeOff, Trash2, MoreVertical, Star, ChevronUp, ChevronDown } from "lucide-react";
+import { togglePostStatus, adminDeletePost, adminToggleFeatured } from "@/app/actions/admin";
 import { PostPreviewModal } from "./preview-modal";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "@/components/ui/toast";
+import { useDebounce } from "@/lib/hooks/use-debounce";
+import Link from "next/link";
 
-export function AdminPostsClient({ data, search, page }: any) {
+export function AdminPostsClient({ data, search, category, status, page, sortBy, sortOrder }: any) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   const [previewPost, setPreviewPost] = useState<any | null>(null);
+  const [searchTerm, setSearchTerm] = useState(search || "");
+  const debouncedSearch = useDebounce(searchTerm, 400);
+
+  useEffect(() => {
+    if (debouncedSearch !== search) {
+      updateFilters("search", debouncedSearch);
+    }
+  }, [debouncedSearch]);
+
+  const updateFilters = (key: string, value: string) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    if (value && value !== "all") current.set(key, value);
+    else current.delete(key);
+    current.delete("page");
+    router.push(`?${current.toString()}`);
+  };
+
+  const handleSort = (key: string) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    if (sortBy === key) {
+      current.set("sortOrder", sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      current.set("sortBy", key);
+      current.set("sortOrder", "asc"); // Default to asc when changing column
+    }
+    router.push(`?${current.toString()}`);
+  };
+
+  const SortIcon = ({ col }: { col: string }) => {
+    if (sortBy !== col) return null;
+    return sortOrder === "asc" ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />;
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosts.size === data.posts.length && data.posts.length > 0) setSelectedPosts(new Set());
+    else setSelectedPosts(new Set(data.posts.map((p: any) => p.id)));
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedPosts);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedPosts(newSet);
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you SURE? This will permanently delete ${selectedPosts.size} posts!`)) return;
+    const ids = Array.from(selectedPosts);
+    for (const id of ids) {
+      await adminDeletePost(id);
+    }
+    toast.success("Bulk Delete", "Posts successfully deleted.");
+    setSelectedPosts(new Set());
+  };
 
   const handleToggleStatus = async (postId: string) => {
-    await togglePostStatus(postId);
+    const res = await togglePostStatus(postId);
+    if (res?.error) toast.error("Error", res.error);
+    else toast.success("Updated", "Post visibility updated.");
+  };
+
+  const handleToggleFeatured = async (postId: string) => {
+    const res = await adminToggleFeatured(postId);
+    if (res?.error) toast.error("Error", res.error);
+    else toast.success("Updated", "Post featured status updated.");
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!confirm(`Are you SURE?`)) return;
+    const res = await adminDeletePost(postId);
+    if (res?.error) toast.error("Error", res.error);
+    else toast.success("Deleted", "Post has been permanently deleted.");
   };
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-        <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", fontWeight: 700, margin: 0 }}>
-          Manage Posts
-        </h1>
-        
-        <form style={{ display: "flex", gap: "0.5rem", maxWidth: 300, width: "100%" }}>
-          <div className="input-group" style={{ margin: 0, flex: 1 }}>
-            <div style={{ position: "relative" }}>
-              <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" }} />
-              <input
-                type="text"
-                name="search"
-                defaultValue={search}
-                placeholder="Search title..."
-                className="input"
-                style={{ paddingLeft: "2.5rem", height: "36px" }}
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn btn-secondary btn-sm">Search</button>
-        </form>
+      <div className="jira-filter-bar">
+        <div className="admin-search-wrapper">
+          <Search size={14} className="admin-search-icon" />
+          <input
+            type="text"
+            className="admin-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search title..."
+          />
+        </div>
+
+        <select className="jira-filter-btn" value={category} onChange={(e) => updateFilters("category", e.target.value)}>
+          <option value="all">Category: All</option>
+          <option value="campus">Campus</option>
+          <option value="events">Events</option>
+          <option value="academic">Academic</option>
+          <option value="sports">Sports</option>
+          <option value="clubs">Clubs</option>
+          <option value="opinion">Opinion</option>
+        </select>
+
+        <select className="jira-filter-btn" value={status} onChange={(e) => updateFilters("status", e.target.value)}>
+          <option value="all">Status: All</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="flagged">Flagged</option>
+        </select>
+
       </div>
 
-      <div className="card" style={{ overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.875rem" }}>
+      {selectedPosts.size > 0 && (
+        <div className="admin-bulk-bar">
+          <span className="admin-bulk-text">{selectedPosts.size} posts selected</span>
+          <div className="flex gap-2">
+            <button onClick={handleBulkDelete} className="btn btn-sm btn-ghost" style={{ background: "rgba(196,30,58,0.1)", color: "var(--error)" }}>
+              <Trash2 size={12} className="mr-1" /> Bulk Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="jira-table-container">
+        <table className="jira-table">
           <thead>
-            <tr style={{ background: "var(--bg-tertiary)", textAlign: "left", color: "var(--text-secondary)" }}>
-              <th style={{ padding: "1rem" }}>Title</th>
-              <th style={{ padding: "1rem" }}>Author</th>
-              <th style={{ padding: "1rem" }}>Category</th>
-              <th style={{ padding: "1rem" }}>Created</th>
-              <th style={{ padding: "1rem" }}>Status</th>
-              <th style={{ padding: "1rem", textAlign: "right" }}>Actions</th>
+            <tr>
+              <th className="pl-4 w-10">
+                <input type="checkbox" checked={selectedPosts.size === data.posts.length && data.posts.length > 0} onChange={toggleSelectAll} className="cursor-pointer" />
+              </th>
+              <th className="cursor-pointer hover:text-primary" onClick={() => handleSort("title")}>
+                <div className="flex items-center">Title <SortIcon col="title" /></div>
+              </th>
+              <th className="cursor-pointer hover:text-primary" onClick={() => handleSort("author")}>
+                <div className="flex items-center">Author <SortIcon col="author" /></div>
+              </th>
+              <th className="cursor-pointer hover:text-primary" onClick={() => handleSort("category")}>
+                <div className="flex items-center">Category <SortIcon col="category" /></div>
+              </th>
+              <th className="cursor-pointer hover:text-primary" onClick={() => handleSort("createdAt")}>
+                <div className="flex items-center">Created <SortIcon col="createdAt" /></div>
+              </th>
+              <th className="cursor-pointer hover:text-primary" onClick={() => handleSort("status")}>
+                <div className="flex items-center">Status <SortIcon col="status" /></div>
+              </th>
+              <th className="text-right pr-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {data.posts.map((post: any) => (
-              <tr key={post.id} style={{ borderTop: "1px solid var(--border-light)" }}>
-                <td style={{ padding: "1rem", fontWeight: 500, color: "var(--text-primary)", maxWidth: 300 }}>
-                  <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <tr key={post.id} className={selectedPosts.has(post.id) ? "jira-table-row-selected" : ""}>
+                <td className="pl-4">
+                  <input type="checkbox" checked={selectedPosts.has(post.id)} onChange={() => toggleSelect(post.id)} className="cursor-pointer" />
+                </td>
+                <td className="font-semibold text-primary max-w-[300px]">
+                  <div className="truncate flex items-center gap-2">
+                    {post.isFeatured && <Star size={12} className="text-warning fill-warning" />}
                     {post.title}
                   </div>
                 </td>
-                <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>@{post.authorUsername}</td>
-                <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
-                  <span className="badge-category">{post.category}</span>
+                <td className="text-secondary">@{post.authorUsername}</td>
+                <td className="text-secondary">
+                  <span className={`badge badge-${post.category}`}>{post.category}</span>
                 </td>
-                <td style={{ padding: "1rem", color: "var(--text-secondary)" }}>
+                <td className="text-secondary text-[0.8rem]">
                   {new Date(post.createdAt).toLocaleDateString()}
+                  <div className="text-[0.7rem] text-tertiary">
+                    {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </td>
-                <td style={{ padding: "1rem" }}>
-                  {post.isPublished && !post.isFlagged ? (
-                    <span style={{ padding: "0.25rem 0.5rem", background: "rgba(45,138,78,0.1)", color: "var(--success)", borderRadius: "1000px", fontSize: "0.75rem", fontWeight: 600 }}>Published</span>
-                  ) : post.isFlagged ? (
-                    <span style={{ padding: "0.25rem 0.5rem", background: "rgba(196,30,58,0.1)", color: "var(--error)", borderRadius: "1000px", fontSize: "0.75rem", fontWeight: 600 }}>Flagged/Disabled</span>
-                  ) : (
-                    <span style={{ padding: "0.25rem 0.5rem", background: "rgba(245,158,11,0.1)", color: "var(--warning)", borderRadius: "1000px", fontSize: "0.75rem", fontWeight: 600 }}>Draft</span>
-                  )}
+                <td>
+                  <InlinePostStatus post={post} />
                 </td>
-                <td style={{ padding: "1rem", textAlign: "right" }}>
-                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-                    <button 
-                      onClick={() => setPreviewPost(post)}
-                      className="btn btn-ghost btn-sm btn-icon"
-                      title="Preview Post"
-                    >
-                      <Eye size={16} />
+                <td className="text-right pr-4">
+                  <div className="admin-actions-group">
+                    <button onClick={() => setPreviewPost(post)} className="admin-action-btn-ghost" title="Preview">
+                      <Eye size={14} />
                     </button>
-                    <button 
-                      onClick={() => handleToggleStatus(post.id)}
-                      className={`btn btn-sm ${post.isFlagged || !post.isPublished ? "btn-secondary" : "btn-ghost"}`}
-                      style={{ color: post.isFlagged || !post.isPublished ? "var(--success)" : "var(--error)" }}
-                    >
-                      {post.isFlagged || !post.isPublished ? (
-                        <>Enable</>
-                      ) : (
-                        <><EyeOff size={14} style={{ marginRight: "0.25rem" }} /> Disable</>
-                      )}
+                    <button onClick={() => handleToggleStatus(post.id)} className="admin-action-btn-ghost" title="Disable/Enable">
+                      <EyeOff size={14} />
                     </button>
+                    <div className="admin-menu-container">
+                      <button className="admin-action-btn-ghost"><MoreVertical size={14} /></button>
+                      <div className="admin-hover-menu">
+                        <button onClick={() => handleToggleFeatured(post.id)} className="admin-menu-item">
+                          <Star size={16} className="text-warning" /> {post.isFeatured ? "Un-feature" : "Feature"}
+                        </button>
+                        <button onClick={() => handleDelete(post.id)} className="admin-menu-item admin-menu-item-danger">
+                          <Trash2 size={16} /> Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        
-        {data.posts.length === 0 && (
-          <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-tertiary)" }}>
-            No posts found matching "{search}"
-          </div>
-        )}
+        {data.posts.length === 0 && <div className="admin-empty-state">No posts found.</div>}
       </div>
 
-      {/* Pagination controls */}
       {data.totalPages > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "2rem" }}>
-          {Array.from({ length: data.totalPages }).map((_, i) => (
-            <a
-              key={i}
-              href={`/admin/posts?page=${i + 1}${search ? `&search=${search}` : ""}`}
-              className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
-              style={{ width: 36, padding: 0, justifyContent: "center" }}
-            >
-              {i + 1}
-            </a>
-          ))}
+        <div className="admin-pagination">
+          {Array.from({ length: data.totalPages }).map((_, i) => {
+            const current = new URLSearchParams(Array.from(searchParams.entries()));
+            current.set("page", (i + 1).toString());
+            return (
+              <Link
+                key={i}
+                href={`?${current.toString()}`}
+                className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
+                style={{ width: 36, padding: 0, justifyContent: "center", display: "flex", alignItems: "center" }}
+              >
+                {i + 1}
+              </Link>
+            );
+          })}
         </div>
       )}
 
-      {previewPost && (
-        <PostPreviewModal post={previewPost} onClose={() => setPreviewPost(null)} />
-      )}
+      {previewPost && <PostPreviewModal post={previewPost} onClose={() => setPreviewPost(null)} />}
     </>
+  );
+}
+
+function InlinePostStatus({ post }: { post: any }) {
+  const [loading, setLoading] = useState(false);
+  const curr = post.isFlagged ? "flagged" : post.isPublished ? "published" : "draft";
+
+  const handleInlineChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!confirm("Confirm status switch?")) return;
+    setLoading(true);
+    await togglePostStatus(post.id);
+    setLoading(false);
+  };
+
+  const statusClass = curr === "flagged" ? "status-flagged" : curr === "published" ? "status-published" : "status-draft";
+  if (loading) return <span className="text-[0.7rem] text-tertiary">Saving...</span>;
+
+  return (
+    <div className="admin-status-wrapper">
+      <select value={curr} onChange={handleInlineChange} className={`admin-status-select ${statusClass}`}>
+        <option value="draft" disabled>DRAFT</option>
+        <option value="published">PUBLISHED</option>
+        <option value="flagged">FLAGGED</option>
+      </select>
+      <span className="admin-status-arrow">▼</span>
+    </div>
   );
 }

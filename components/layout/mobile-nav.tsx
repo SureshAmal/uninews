@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, PenLine, User, KeyRound, UserPlus, Bookmark } from "lucide-react";
+import { Home, Search, PenLine, User, KeyRound, UserPlus, Bookmark, Shield } from "lucide-react";
 
 interface NavUser {
   userId: string;
   username: string;
+  isAdmin?: boolean;
 }
 
 export function MobileNav({ user }: { user: NavUser | null }) {
@@ -50,6 +51,9 @@ export function MobileNav({ user }: { user: NavUser | null }) {
                 label="Profile"
                 active={pathname.startsWith("/profile")}
               />
+              {user.isAdmin && (
+                <NavItem href="/admin" icon={<Shield />} label="Admin" active={pathname.startsWith("/admin")} />
+              )}
             </>
           ) : (
             <>

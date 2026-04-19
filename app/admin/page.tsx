@@ -11,41 +11,22 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="animate-fade-in">
-      <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", fontWeight: 700, marginBottom: "2rem" }}>
+    <div className="admin-dashboard-container animate-fade-in">
+      <h1 className="headline-large mb-8">
         Dashboard Overview
       </h1>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+      <div className="admin-grid">
         {cards.map((card, idx) => (
-          <div
-            key={idx}
-            className="card"
-            style={{
-              padding: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "1.5rem",
-            }}
-          >
-            <div
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: "var(--radius-md)",
-                background: "var(--bg-tertiary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+          <div key={idx} className="card admin-stat-card">
+            <div className="admin-stat-icon-box">
               {card.icon}
             </div>
             <div>
-              <p style={{ fontSize: "0.875rem", color: "var(--text-tertiary)", margin: 0, fontWeight: 500 }}>
+              <p className="admin-stat-label">
                 {card.label}
               </p>
-              <p style={{ fontSize: "2rem", fontFamily: "var(--font-heading)", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
+              <p className="admin-stat-value">
                 {card.value.toLocaleString()}
               </p>
             </div>

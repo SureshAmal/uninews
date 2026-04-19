@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, FileText, Star, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, FileText, Star, ArrowLeft, MessageSquare, Megaphone, ShieldAlert, LogOut } from "lucide-react";
+import "./admin.css";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -11,73 +12,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Users" },
     { href: "/admin/posts", icon: <FileText size={20} />, label: "Posts" },
+    { href: "/admin/comments", icon: <MessageSquare size={20} />, label: "Comments" },
     { href: "/admin/reviews", icon: <Star size={20} />, label: "Reviews" },
+    { href: "/admin/announcements", icon: <Megaphone size={20} />, label: "Announcements" },
+    { href: "/admin/audit", icon: <ShieldAlert size={20} />, label: "Audit Logs" },
   ];
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-secondary)" }}>
+    <div className="admin-layout">
       {/* Sidebar */}
-      <aside
-        style={{
-          width: "280px",
-          background: "var(--bg-card)",
-          borderRight: "1px solid var(--border-light)",
-          display: "flex",
-          flexDirection: "column",
-          padding: "1.5rem",
-        }}
-      >
-        <div style={{ marginBottom: "2rem" }}>
-          <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>
-            Admin Panel
-          </h2>
-          <p style={{ fontSize: "0.875rem", color: "var(--text-tertiary)", marginTop: "0.25rem" }}>
-            UniNews Moderation
-          </p>
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-header">
+          <h2 className="admin-sidebar-title">Admin Panel</h2>
         </div>
 
-        <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <nav className="admin-sidebar-nav">
           {links.map((link) => {
             const active = pathname === link.href;
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  padding: "0.75rem 1rem",
-                  borderRadius: "var(--radius-md)",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                  transition: "all 0.2s",
-                  background: active ? "var(--bg-hover)" : "transparent",
-                  color: active ? "var(--text-primary)" : "var(--text-secondary)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.background = "var(--bg-hover)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!active) e.currentTarget.style.background = "transparent";
-                }}
+                className={`admin-nav-link ${active ? "admin-nav-link-active" : ""}`}
               >
-                <div style={{ color: active ? "var(--accent)" : "inherit" }}>{link.icon}</div>
+                <div className="admin-nav-icon">{link.icon}</div>
                 {link.label}
               </Link>
             );
           })}
         </nav>
 
-        <div style={{ marginTop: "auto", paddingTop: "2rem" }}>
-          <Link href="/" className="btn btn-ghost" style={{ width: "100%", justifyContent: "flex-start" }}>
-            <ArrowLeft size={16} style={{ marginRight: "0.5rem" }} /> Back to Site
+        <div style={{ marginTop: "auto", padding: "1rem" }}>
+          <Link href="/" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+            <ArrowLeft size={16} className="mr-1" /> Back to Site
           </Link>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: "2rem 3rem", overflowY: "auto", height: "100vh" }}>
+      <main className="admin-main">
         {children}
       </main>
     </div>

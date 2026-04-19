@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ToastContainer } from "@/components/ui/toast";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getActiveAnnouncement } from "@/app/actions/admin";
 
 export const metadata: Metadata = {
   title: "UniNews — University News Platform",
@@ -19,6 +20,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await getCurrentUser();
+  const announcement = await getActiveAnnouncement();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -49,6 +51,11 @@ export default async function RootLayout({
           flexDirection: "column",
         }}
       >
+        {announcement && (
+          <div style={{ background: "var(--warning)", color: "#000", padding: "0.5rem 1rem", textAlign: "center", fontWeight: 600, fontSize: "0.875rem" }}>
+            {announcement.message}
+          </div>
+        )}
         <Navbar user={user} />
         <main style={{ flex: 1 }}>{children}</main>
         <MobileNav user={user} />

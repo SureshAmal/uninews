@@ -49,6 +49,7 @@ export const posts = pgTable(
     viewCount: integer("view_count").default(0).notNull(),
     isPublished: boolean("is_published").default(true).notNull(),
     isFlagged: boolean("is_flagged").default(false).notNull(),
+    isFeatured: boolean("is_featured").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     editedAt: timestamp("edited_at"),
@@ -178,6 +179,29 @@ export const comments = pgTable(
   ]
 );
 
+// ─── Announcements ───────────────────────────────────────────────────
+export const announcements = pgTable("announcements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  message: text("message").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ─── Audit Logs ─────────────────────────────────────────────────────
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    adminId: uuid("admin_id")
+      .references(() => users.id, { onDelete: "set null" }), // NULL if admin was hard-deleted later
+    actionType: varchar("action_type", { length: 50 }).notNull(), // e.g. DELETE_USER, PIN_POST
+    targetId: varchar("target_id", { length: 100 }), // The ID of the thing affected (can be UUID or string)
+    description: text("description"), // Human readable log "Admin X deleted User Y"
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("audit_logs_created_idx").on(table.createdAt)]
+);
+
 // ─── Type exports ────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -185,3 +209,5 @@ export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
 export type Comment = typeof comments.$inferSelect;
+export type Announcement = typeof announcements.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;
