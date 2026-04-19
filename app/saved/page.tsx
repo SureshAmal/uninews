@@ -1,7 +1,7 @@
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { saves, posts, users, likes } from "@/lib/db/schema";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { ArticleCard } from "@/components/newspaper/article-card";
 import { BackButton } from "@/components/layout/back-button";
 import { Bookmark } from "lucide-react";
@@ -12,21 +12,11 @@ export default async function SavedPostsPage() {
   const user = await getCurrentUser();
   if (!user) {
     return (
-      <div
-        className="container-news animate-fade-in"
-        style={{ paddingTop: "2rem", paddingBottom: "4rem", textAlign: "center" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "2rem",
-            fontWeight: 700,
-            marginBottom: "1rem",
-          }}
-        >
+      <div className="container-news animate-fade-in pt-8 pb-16 text-center">
+        <h1 className="font-heading text-[2rem] font-bold mb-4">
           Saved Posts
         </h1>
-        <p style={{ color: "var(--text-tertiary)", marginBottom: "1.5rem" }}>
+        <p className="text-tertiary mb-6">
           Log in to view your saved posts.
         </p>
         <Link href="/login" className="btn btn-primary">
@@ -89,76 +79,30 @@ export default async function SavedPostsPage() {
   }));
 
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
-    >
+    <div className="container-news animate-fade-in pt-8 pb-16">
       <BackButton />
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "2rem",
-          fontWeight: 700,
-          marginBottom: "0.5rem",
-        }}
-      >
-        <Bookmark
-          size={24}
-          style={{ display: "inline", marginRight: "0.5rem", verticalAlign: "middle" }}
-        />
+      <h1 className="font-heading text-[2rem] font-bold mb-2 flex items-center gap-2">
+        <Bookmark size={24} className="align-middle" />
         Saved Posts
       </h1>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "2rem",
-        }}
-      >
+      <p className="text-[0.875rem] text-tertiary mb-8">
         Posts you&apos;ve bookmarked for later
       </p>
 
       {displayPosts.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem 2rem",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          <div
-            style={{
-              marginBottom: "1rem",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+        <div className="text-center py-16 px-8 text-tertiary">
+          <div className="mb-4 flex justify-center">
             <Bookmark size={48} />
           </div>
-          <h3
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "1.25rem",
-              fontWeight: 600,
-              marginBottom: "0.5rem",
-              color: "var(--text-secondary)",
-            }}
-          >
+          <h3 className="font-heading text-xl font-semibold mb-2 text-secondary">
             No saved posts yet
           </h3>
-          <p style={{ fontSize: "0.875rem" }}>
+          <p className="text-[0.875rem]">
             Bookmark posts while reading to find them here later.
           </p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-          className="stagger-children"
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6 stagger-children">
           {displayPosts.map((post) => (
             <ArticleCard key={post.id} post={post} size="medium" />
           ))}

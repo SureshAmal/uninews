@@ -75,37 +75,16 @@ function CommentItem({
   };
 
   return (
-    <div
-      style={{
-        paddingLeft: isReply ? "2.5rem" : 0,
-        borderLeft: isReply ? "2px solid var(--border-light)" : "none",
-        marginLeft: isReply ? "1rem" : 0,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          padding: "0.875rem 0",
-          borderBottom: isReply ? "none" : "1px solid var(--border-light)",
-        }}
-      >
+    <div className={isReply ? "comment-reply-thread" : ""}>
+      <div className={`comment-root ${isReply ? "border-none" : ""}`}>
         {/* Avatar */}
         <Link href={`/profile/${comment.author.username}`}>
-          <div
-            className="avatar avatar-md"
-            style={{ flexShrink: 0 }}
-          >
+          <div className="avatar avatar-md shrink-0">
             {comment.author.avatarUrl ? (
               <img
                 src={comment.author.avatarUrl}
                 alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
+                className="w-full h-full rounded-full object-cover"
               />
             ) : (
               (comment.author.displayName || comment.author.username)[0].toUpperCase()
@@ -114,39 +93,29 @@ function CommentItem({
         </Link>
 
         {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.25rem" }}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
             <Link
               href={`/profile/${comment.author.username}`}
-              style={{ fontWeight: 600, fontSize: "0.875rem", textDecoration: "none", color: "var(--text-primary)" }}
+              className="comment-author-link"
             >
               {comment.author.displayName || comment.author.username}
             </Link>
-            <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary)" }}>
+            <span className="comment-timestamp">
               {timeAgo(comment.createdAt)}
             </span>
           </div>
 
-          <p style={{ fontSize: "0.9375rem", color: "var(--text-secondary)", lineHeight: 1.5, margin: 0 }}>
+          <p className="comment-body">
             {comment.content}
           </p>
 
           {/* Actions */}
           {isLoggedIn && !isReply && (
-            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.375rem" }}>
+            <div className="flex gap-2 mt-1.5 transition-all">
               <button
                 onClick={() => setShowReplyForm(!showReplyForm)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.75rem",
-                  color: "var(--text-tertiary)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.25rem",
-                  padding: "0.25rem 0",
-                }}
+                className="comment-action-btn"
               >
                 <Reply size={14} /> Reply
               </button>
@@ -155,15 +124,14 @@ function CommentItem({
 
           {/* Reply form */}
           {showReplyForm && (
-            <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <div className="flex gap-2 mt-2">
               <input
                 type="text"
-                className="input"
+                className="input !text-[0.875rem]"
                 placeholder="Write a reply..."
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleReply()}
-                style={{ fontSize: "0.875rem" }}
               />
               <button
                 onClick={handleReply}
@@ -226,15 +194,15 @@ export function CommentSection({
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
+    <div className="mt-8">
       <div className="section-divider">
-        <MessageCircle size={16} style={{ marginRight: "0.25rem" }} />
+        <MessageCircle size={16} className="mr-1" />
         Comments ({comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)})
       </div>
 
       {/* Comment form */}
       {isLoggedIn ? (
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem" }}>
+        <div className="flex gap-2 mb-6">
           <input
             type="text"
             className="input"
@@ -252,7 +220,7 @@ export function CommentSection({
           </button>
         </div>
       ) : (
-        <p style={{ fontSize: "0.8125rem", color: "var(--text-tertiary)", marginBottom: "1rem" }}>
+        <p className="text-[0.8125rem] text-[var(--text-tertiary)] mb-4">
           Log in to join the conversation.
         </p>
       )}

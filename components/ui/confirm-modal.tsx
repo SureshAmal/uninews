@@ -75,95 +75,40 @@ export function ConfirmModal({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 5000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-        animation: `${isOpen ? "fade-in" : "fade-out"} 0.2s ease-out forwards`,
-      }}
+      className={`modal-overlay ${isOpen ? "animate-fade-in" : "animate-fade-out"}`}
       onAnimationEnd={handleAnimationEnd}
     >
       {/* Backdrop */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "rgba(0, 0, 0, 0.4)",
-          backdropFilter: "blur(4px)",
-        }}
-        onClick={onClose}
-      />
+      <div className="modal-backdrop" onClick={onClose} />
 
       {/* Modal Card */}
       <div
         ref={modalRef}
         tabIndex={-1}
-        style={{
-          position: "relative",
-          outline: "none",
-          width: "100%",
-          maxWidth: "400px",
-          background: "var(--bg-primary)",
-          borderRadius: "16px",
-          overflow: "hidden",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-          border: "1px solid var(--border-color)",
-          animation: `${isOpen ? "scale-up" : "scale-down"} 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
-        }}
+        className={`modal-card ${isOpen ? "animate-scale-up" : "animate-scale-down"}`}
       >
         {/* Header */}
-        <div style={{ padding: "1.5rem 1.5rem 0.5rem 1.5rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{ 
-            width: "40px", 
-            height: "40px", 
-            borderRadius: "50%", 
-            background: isDestructive ? "var(--error-soft)" : "var(--accent-soft)", 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center",
-            color: isDestructive ? "var(--error)" : "var(--accent-text)"
-          }}>
+        <div className="modal-header">
+          <div className={`modal-icon-box ${isDestructive ? "bg-error-soft text-error" : "bg-accent-soft text-accent"}`}>
             {isDestructive ? <AlertTriangle size={20} /> : <Trash2 size={20} />}
           </div>
-          <h3 style={{ 
-            fontSize: "1.25rem", 
-            fontWeight: 700, 
-            fontFamily: "var(--font-heading)", 
-            margin: 0,
-            color: "var(--text-primary)"
-          }}>
+          <h3 className="headline-small m-0 text-primary">
             {title}
           </h3>
         </div>
 
         {/* Body */}
-        <div style={{ padding: "1rem 1.5rem" }}>
-          <p style={{ 
-            fontSize: "0.9375rem", 
-            lineHeight: 1.6, 
-            color: "var(--text-secondary)", 
-            margin: 0 
-          }}>
+        <div className="modal-body">
+          <p className="text-secondary m-0 leading-relaxed text-sm">
             {message}
           </p>
         </div>
 
         {/* Footer */}
-        <div style={{ 
-          padding: "1.25rem 1.5rem", 
-          background: "var(--bg-secondary)", 
-          display: "flex", 
-          gap: "0.75rem",
-          borderTop: "1px solid var(--border-color)"
-        }}>
+        <div className="modal-footer">
           <button
             onClick={onClose}
-            className="btn btn-secondary"
-            style={{ flex: 1, padding: "0.75rem", fontWeight: 600 }}
+            className="btn btn-secondary flex-1 py-3 font-semibold"
           >
             {cancelText}
           </button>
@@ -172,14 +117,7 @@ export function ConfirmModal({
               onConfirm();
               onClose();
             }}
-            className={`btn ${isDestructive ? "btn-danger" : "btn-primary"}`}
-            style={{ 
-              flex: 1, 
-              padding: "0.75rem", 
-              fontWeight: 600,
-              backgroundColor: isDestructive ? "var(--error)" : "var(--accent-primary)",
-              color: "#fff"
-            }}
+            className={`btn flex-1 py-3 font-semibold ${isDestructive ? "btn-danger" : "btn-primary"}`}
           >
             {confirmText}
           </button>
@@ -188,34 +126,11 @@ export function ConfirmModal({
         {/* Close Button x */}
         <button
           onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "1rem",
-            right: "1rem",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--text-tertiary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4px",
-            borderRadius: "50%",
-            transition: "all 0.2s"
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-tertiary)")}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+          className="modal-close-x"
         >
           <X size={18} />
         </button>
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes scale-up { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes scale-down { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
-      `}</style>
     </div>
   );
 }

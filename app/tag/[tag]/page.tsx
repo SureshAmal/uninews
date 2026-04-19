@@ -16,26 +16,16 @@ export default async function TagPage({
   const initialPosts = await getRankedPosts(20, 0, "all", decodedTag);
   
   return (
-    <main className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
-      <div className="container-news" style={{ paddingTop: "2rem" }}>
+    <main className="min-h-screen bg-primary">
+      <div className="container-news pt-8">
         <BackButton />
         
-        <header style={{ 
-          marginTop: "2rem", 
-          marginBottom: "3rem", 
-          borderBottom: "4px solid var(--text-primary)",
-          paddingBottom: "1rem"
-        }}>
-          <h1 className="headline-hero" style={{ fontSize: "clamp(2rem, 8vw, 4rem)", marginBottom: "0.5rem", color: "var(--text-primary)" }}>
-            Edition: #{decodedTag}
+        <header className="py-8 mb-8 border-b border-divider">
+          <h1 className="headline-hero text-[clamp(2rem,8vw,4rem)] mb-2 text-primary uppercase">
+            #{tag}
           </h1>
-          <p style={{ 
-            fontFamily: "var(--font-serif)", 
-            fontStyle: "italic", 
-            color: "var(--text-secondary)",
-            fontSize: "1.2rem"
-          }}>
-            Discovery through taxonomic curiosity.
+          <p className="article-card-meta text-tertiary">
+            Browsing articles tagged with #{tag}
           </p>
         </header>
 

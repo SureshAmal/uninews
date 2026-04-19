@@ -34,15 +34,10 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
 
   return (
     <article 
-      className="animate-fade-in"
+      className="feed-article animate-fade-in"
       style={{ 
         gridColumn: `span ${post.colSpan}`,
         gridRow: `span ${actualRowSpan}`,
-        borderBottom: "1px solid var(--border-color)",
-        paddingBottom: "1rem",
-        marginBottom: "0.5rem",
-        alignSelf: "start",
-        position: "relative",
         opacity: isDeleting ? 0.5 : 1,
         pointerEvents: isDeleting ? "none" : "auto"
       }}
@@ -59,36 +54,24 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
         confirmText={isAdmin ? "Hard Delete" : "Archive Edition"}
       />
 
-      <div ref={innerRef} style={{ display: "flex", flexDirection: "column" }}>
+      <div ref={innerRef} className="flex flex-col">
         {post.coverImageUrl && (
-          <div style={{ marginBottom: "1rem", height: post.imageHeight, overflow: "hidden" }}>
+          <div className="feed-image-container" style={{ height: post.imageHeight }}>
             <Link href={`/post/${post.id}`}>
               <img 
                 src={post.coverImageUrl} 
                 alt={post.title} 
-                style={{ 
-                  width: "100%", 
-                  height: "100%", 
-                  display: "block",
-                  filter: "grayscale(20%) contrast(1.05)", 
-                  objectFit: "cover"
-                }} 
+                className="feed-image"
               />
             </Link>
           </div>
         )}
         
-        <div style={{ flex: 1 }}>
-          <Link href={`/post/${post.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+        <div className="flex-1">
+          <Link href={`/post/${post.id}`} className="no-underline text-inherit">
             <h2 
-              style={{ 
-                fontFamily: "var(--font-heading)", 
-                fontSize: post.colSpan > 4 ? "2rem" : "1.5rem", 
-                fontWeight: 800, 
-                lineHeight: 1.1,
-                marginBottom: "0.75rem",
-                letterSpacing: "-0.02em"
-              }}
+              className="feed-headline"
+              style={{ fontSize: post.colSpan > 4 ? "2rem" : "1.5rem" }}
             >
               {post.title}
             </h2>
@@ -97,22 +80,12 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
           <PretextArticle content={post.content} columnCount={post.textColumns} />
 
           {post.tags && post.tags.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem" }}>
+            <div className="feed-tags-container">
               {post.tags.slice(0, 3).map((tag: string) => (
                 <Link 
                   key={tag} 
                   href={`/tag/${tag}`}
-                  className="tag-pill-hover"
-                  style={{ 
-                    fontSize: "0.7rem", 
-                    color: "var(--text-tertiary)", 
-                    background: "var(--bg-tertiary)", 
-                    padding: "0.15rem 0.6rem", 
-                    borderRadius: "100px",
-                    textDecoration: "none",
-                    border: "1px solid var(--border-color)",
-                    transition: "all 0.2s ease"
-                  }}
+                  className="feed-tag-pill tag-pill-hover"
                 >
                   #{tag}
                 </Link>
@@ -316,7 +289,7 @@ export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initia
   }, [posts, feedWidth]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", margin: "0", padding: feedWidth < 640 ? "0 1rem" : "0 2rem" }}>
+    <div ref={containerRef} className={`w-full m-0 ${feedWidth < 640 ? "px-4" : "px-8"}`}>
       <div 
         style={{ 
           display: "grid", 
@@ -333,9 +306,13 @@ export function NewspaperFeed({ initialPosts, currentUser, tagFilter }: { initia
         ))}
       </div>
 
-      <div ref={observerTarget} style={{ gridColumn: "span 12", height: "100px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        {loading && <div style={{ fontFamily: "var(--font-newspaper)", fontSize: "1.2rem", fontStyle: "italic" }}>Printing more pages...</div>}
-        {!hasMore && posts.length > 0 && <div style={{ fontFamily: "var(--font-newspaper)", fontSize: "1.2rem", fontStyle: "italic", borderTop: "1px solid var(--border-color)", borderBottom: "1px solid var(--border-color)", padding: "0.5rem 0", width: "100%", textAlign: "center" }}>End of Edition</div>}
+      <div ref={observerTarget} className="span-12 h-[100px] flex justify-center items-center">
+        {loading && <div className="font-newspaper text-[1.2rem] italic">Printing more pages...</div>}
+        {!hasMore && posts.length > 0 && (
+          <div className="font-newspaper text-[1.2rem] italic border-y border-divider py-2 w-full text-center">
+            End of Edition
+          </div>
+        )}
       </div>
     </div>
   );

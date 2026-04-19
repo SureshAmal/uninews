@@ -35,18 +35,9 @@ const MenuButton = ({
     type="button"
     onClick={onClick}
     title={title}
-    style={{
-      padding: "0.5rem",
-      background: isActive ? "var(--accent-soft)" : "transparent",
-      color: isActive ? "var(--accent)" : "var(--text-secondary)",
-      border: "none",
-      borderRadius: "var(--radius-sm)",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      transition: "all 0.2s",
-    }}
+    className={`p-2 border-none rounded-sm cursor-pointer flex items-center justify-center transition-all duration-200 ${
+      isActive ? "bg-accent-soft text-accent" : "bg-transparent text-secondary hover:bg-bg-hover"
+    }`}
   >
     {children}
   </button>
@@ -68,8 +59,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     },
     editorProps: {
       attributes: {
-        class: "prose-newspaper text-editor-content",
-        style: "min-height: 300px; outline: none; font-family: var(--font-body); font-size: 1.125rem; line-height: 1.8; color: var(--text-primary);",
+        class: "prose-newspaper text-editor-content outline-none min-h-[300px] font-body text-[1.125rem] leading-[1.8] text-primary",
       },
     },
   });
@@ -77,24 +67,8 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
   if (!editor) return null;
 
   return (
-    <div 
-      style={{ 
-        border: "1px solid var(--border-color)", 
-        borderRadius: "var(--radius-md)", 
-        overflow: "hidden",
-        background: "var(--bg-secondary)"
-      }}
-    >
-      <div 
-        style={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: "0.25rem", 
-          padding: "0.5rem", 
-          borderBottom: "1px solid var(--border-color)",
-          background: "var(--bg-tertiary)"
-        }}
-      >
+    <div className="border border-divider rounded-md overflow-hidden bg-secondary">
+      <div className="flex flex-wrap gap-1 p-2 border-bottom border-divider bg-bg-tertiary">
         <MenuButton 
           onClick={() => editor.chain().focus().toggleBold().run()} 
           isActive={editor.isActive("bold")}
@@ -109,7 +83,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           <Italic size={18} />
         </MenuButton>
-        <div style={{ width: 1, background: "var(--border-color)", margin: "0 0.25rem" }} />
+        <div className="w-[1px] bg-divider mx-1 self-stretch" />
         <MenuButton 
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} 
           isActive={editor.isActive("heading", { level: 2 })}
@@ -124,7 +98,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           <Heading3 size={18} />
         </MenuButton>
-        <div style={{ width: 1, background: "var(--border-color)", margin: "0 0.25rem" }} />
+        <div className="w-[1px] bg-divider mx-1 self-stretch" />
         <MenuButton 
           onClick={() => editor.chain().focus().toggleBulletList().run()} 
           isActive={editor.isActive("bulletList")}
@@ -146,7 +120,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         >
           <Quote size={18} />
         </MenuButton>
-        <div style={{ marginLeft: "auto", display: "flex", gap: "0.25rem" }}>
+        <div className="ml-auto flex gap-1">
           <MenuButton 
             onClick={() => editor.chain().focus().undo().run()} 
             title="Undo"
@@ -161,7 +135,7 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           </MenuButton>
         </div>
       </div>
-      <div style={{ padding: "1.5rem" }}>
+      <div className="p-6">
         <EditorContent editor={editor} />
       </div>
     </div>

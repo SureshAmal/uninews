@@ -1,61 +1,27 @@
 export default function Loading() {
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
-    >
+    <div className="container-news animate-fade-in pt-8 pb-16">
       {/* Masthead skeleton */}
-      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <div
-          className="skeleton"
-          style={{ width: 200, height: 36, margin: "0 auto 0.5rem" }}
-        />
-        <div
-          className="skeleton"
-          style={{ width: 300, height: 14, margin: "0 auto" }}
-        />
+      <div className="text-center mb-8">
+        <div className="skeleton w-[200px] h-9 mx-auto mb-2" />
+        <div className="skeleton w-[300px] h-3.5 mx-auto" />
       </div>
 
       {/* Grid skeleton */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-          gap: "1.5rem",
-        }}
-      >
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            style={{
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-light)",
-              overflow: "hidden",
-            }}
+            className="rounded-md border border-[var(--border-light)] overflow-hidden"
           >
-            <div
-              className="skeleton"
-              style={{ width: "100%", height: 180, borderRadius: 0 }}
-            />
-            <div style={{ padding: "1rem" }}>
-              <div
-                className="skeleton"
-                style={{ width: 60, height: 12, marginBottom: "0.75rem" }}
-              />
-              <div
-                className="skeleton"
-                style={{ width: "90%", height: 20, marginBottom: "0.5rem" }}
-              />
-              <div
-                className="skeleton"
-                style={{ width: "70%", height: 14, marginBottom: "1rem" }}
-              />
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <div
-                  className="skeleton"
-                  style={{ width: 24, height: 24, borderRadius: "50%" }}
-                />
-                <div className="skeleton" style={{ width: 100, height: 14 }} />
+            <div className="skeleton w-full h-[180px] rounded-none" />
+            <div className="p-4">
+              <div className="skeleton w-[60px] h-3 mb-3" />
+              <div className="skeleton w-[90%] h-5 mb-2" />
+              <div className="skeleton w-[70%] h-3.5 mb-4" />
+              <div className="flex gap-2">
+                <div className="skeleton w-6 h-6 rounded-full" />
+                <div className="skeleton w-[100px] h-3.5" />
               </div>
             </div>
           </div>

@@ -37,24 +37,16 @@ export function PostActions({ postId, isAuthor, isAdmin }: PostActionsProps) {
         confirmText={isAdmin ? "Hard Delete" : "Archive Edition"}
       />
 
-      <div style={{ display: "flex", gap: "0.5rem", opacity: isDeleting ? 0.5 : 1 }}>
+      <div className={`flex gap-2 ${isDeleting ? "opacity-50" : "opacity-100"}`}>
         <Link
           href={`/post/${postId}/edit`}
-          className="btn btn-secondary btn-sm"
-          style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}
+          className="btn btn-secondary btn-sm flex items-center gap-1"
         >
           <Pencil size={16} /> Edit
         </Link>
         <button
           onClick={() => setShowDeleteModal(true)}
-          className="btn btn-outline btn-sm"
-          style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "0.25rem", 
-            color: "var(--error)",
-            borderColor: "var(--error-soft)" 
-          }}
+          className="btn btn-outline btn-sm flex items-center gap-1 text-error border-error-soft hover:bg-error-soft"
           disabled={isDeleting}
         >
           <Trash2 size={16} /> Delete

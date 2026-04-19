@@ -39,16 +39,9 @@ export const Sticker = Node.create({
       return (
         <NodeViewWrapper 
           as="span" 
-          className="sticker-wrapper"
+          className="sticker-wrapper inline-flex items-center mx-1 cursor-grab relative"
           contentEditable={false}
-          style={{ 
-            display: "inline-flex", 
-            fontSize: size, 
-            verticalAlign: "middle", 
-            margin: "0 0.25rem",
-            cursor: "grab",
-            position: "relative"
-          }}
+          style={{ fontSize: size } as React.CSSProperties}
         >
           {name}
           <div className="sticker-toolbar" contentEditable={false}>

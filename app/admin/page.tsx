@@ -5,9 +5,9 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   const cards = [
-    { label: "Total Users", value: stats.totalUsers, icon: <Users size={24} color="var(--accent)" /> },
-    { label: "Total Posts", value: stats.totalPosts, icon: <FileText size={24} color="var(--success)" /> },
-    { label: "Total Reviews", value: stats.totalReviews, icon: <Star size={24} color="var(--warning)" /> },
+    { label: "Total Users", value: stats.totalUsers, icon: <Users size={24} className="stat-icon-users" /> },
+    { label: "Total Posts", value: stats.totalPosts, icon: <FileText size={24} className="stat-icon-posts" /> },
+    { label: "Total Reviews", value: stats.totalReviews, icon: <Star size={24} className="stat-icon-reviews" /> },
   ];
 
   return (

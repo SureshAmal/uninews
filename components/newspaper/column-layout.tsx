@@ -19,33 +19,14 @@ export function ColumnLayout({ posts }: ColumnLayoutProps) {
 
   if (posts.length === 0) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "4rem 2rem",
-          color: "var(--text-tertiary)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "3rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <Newspaper size={48} style={{ margin: "0 auto" }} />
+      <div className="newspaper-empty-state">
+        <div className="mb-4">
+          <Newspaper size={48} className="mx-auto" />
         </div>
-        <h3
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "1.5rem",
-            fontWeight: 600,
-            marginBottom: "0.5rem",
-            color: "var(--text-secondary)",
-          }}
-        >
+        <h3 className="headline-small mb-2 text-secondary">
           No news yet
         </h3>
-        <p style={{ fontSize: "0.9375rem" }}>
+        <p className="text-secondary text-sm">
           Be the first to post a story! Log in and share what&apos;s happening on campus.
         </p>
       </div>
@@ -60,112 +41,62 @@ export function ColumnLayout({ posts }: ColumnLayoutProps) {
   return (
     <div
       ref={containerRef}
-      className={mounted ? "animate-fade-in" : ""}
-      style={{ opacity: mounted ? 1 : 0 }}
+      className={mounted ? "animate-fade-in opacity-100" : "opacity-0"}
     >
       {/* Hero Article */}
       {heroPosts.length > 0 && (
-        <div style={{ marginBottom: "1.5rem" }}>
+        <div className="mb-6">
           <ArticleCard post={heroPosts[0]} size="hero" />
         </div>
       )}
 
       {/* Main Grid: Articles + Sidebar */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 320px",
-          gap: "1.5rem",
-          alignItems: "start",
-        }}
-        className="main-grid"
-      >
+      <div className="newspaper-grid">
         {/* Left column */}
-        <div className="stagger-children">
+        <div className="stagger-children flex flex-col gap-6">
           {mainPosts
             .filter((_, i) => i % 2 === 0)
             .map((post) => (
-              <div key={post.id} style={{ marginBottom: "1.5rem" }}>
+              <div key={post.id}>
                 <ArticleCard post={post} size="large" />
               </div>
             ))}
         </div>
 
         {/* Middle column */}
-        <div className="stagger-children">
+        <div className="stagger-children flex flex-col gap-6">
           {mainPosts
             .filter((_, i) => i % 2 === 1)
             .map((post) => (
-              <div key={post.id} style={{ marginBottom: "1.5rem" }}>
+              <div key={post.id}>
                 <ArticleCard post={post} size="medium" />
               </div>
             ))}
         </div>
 
         {/* Sidebar: Trending */}
-        <aside
-          style={{
-            borderLeft: "1px solid var(--divider)",
-            paddingLeft: "1.5rem",
-          }}
-          className="news-sidebar"
-        >
-          <div className="section-divider" style={{ marginTop: 0 }}>
+        <aside className="newspaper-sidebar">
+          <div className="section-divider mt-0">
             Trending
           </div>
           {sidebarPosts.length > 0 ? (
             sidebarPosts.slice(0, 8).map((post, i) => (
-              <div key={post.id} style={{ display: "flex", gap: "0.75rem" }}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.75rem",
-                    fontWeight: 700,
-                    color: "var(--border-color)",
-                    lineHeight: 1,
-                    minWidth: 28,
-                  }}
-                >
+              <div key={post.id} className="flex gap-3 mb-6 last:mb-0">
+                <span className="newspaper-trending-number">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                   <ArticleCard post={post} size="compact" showImage={false} />
                 </div>
               </div>
             ))
           ) : (
-            <p
-              style={{
-                fontSize: "0.8125rem",
-                color: "var(--text-tertiary)",
-                padding: "1rem 0",
-              }}
-            >
+            <p className="text-[0.8125rem] text-tertiary py-4">
               More stories coming soon...
             </p>
           )}
         </aside>
       </div>
-
-      <style>{`
-        @media (max-width: 1024px) {
-          .main-grid {
-            grid-template-columns: 1fr 1fr !important;
-          }
-          .news-sidebar {
-            grid-column: 1 / -1;
-            border-left: none !important;
-            padding-left: 0 !important;
-            border-top: 1px solid var(--divider);
-            padding-top: 1.5rem;
-          }
-        }
-        @media (max-width: 640px) {
-          .main-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

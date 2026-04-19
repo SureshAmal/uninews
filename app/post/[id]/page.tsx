@@ -40,90 +40,51 @@ export default async function PostPage({
   });
 
   return (
-    <div className="container-news" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+    <div className="container-news pt-8 pb-16">
       <BackButton />
-      <article
-        className="animate-fade-in"
-        style={{ maxWidth: 740, margin: "0 auto" }}
-      >
+      <article className="animate-fade-in max-w-[740px] mx-auto">
         {/* Category + Date */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="flex items-center gap-3 mb-4">
           <span className={`badge ${getCategoryClass(post.category)}`}>
             {post.category}
           </span>
-          <span style={{ fontSize: "0.8125rem", color: "var(--text-tertiary)" }}>
+          <span className="text-[0.8125rem] text-tertiary">
             {publishDate}
           </span>
           {post.editedAt && (
-            <span
-              style={{
-                fontSize: "0.75rem",
-                color: "var(--text-tertiary)",
-                fontStyle: "italic",
-              }}
-            >
+            <span className="text-[0.75rem] text-tertiary italic">
               (edited)
             </span>
           )}
         </div>
 
         {/* Title */}
-        <h1
-          className="headline-hero"
-          style={{ marginBottom: "1.25rem" }}
-        >
+        <h1 className="headline-hero mb-5">
           {post.title}
         </h1>
 
         {/* Author Info */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "1.5rem",
-            paddingBottom: "1rem",
-            borderBottom: "1px solid var(--border-light)",
-          }}
-        >
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-divider">
           <Link
             href={`/profile/${post.author.username}`}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              textDecoration: "none",
-              color: "inherit",
-            }}
+            className="flex items-center gap-3 no-underline text-inherit"
           >
             <div className="avatar avatar-lg">
               {post.author.avatarUrl ? (
                 <img
                   src={post.author.avatarUrl}
                   alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
+                  className="w-full h-full rounded-full object-cover"
                 />
               ) : (
                 (post.author.displayName || post.author.username)[0].toUpperCase()
               )}
             </div>
             <div>
-              <div style={{ fontWeight: 600 }}>
+              <div className="font-semibold">
                 {post.author.displayName || post.author.username}
               </div>
-              <div style={{ fontSize: "0.8125rem", color: "var(--text-tertiary)" }}>
+              <div className="text-[0.8125rem] text-tertiary">
                 @{post.author.username}
               </div>
             </div>
@@ -134,25 +95,13 @@ export default async function PostPage({
           )}
         </div>
 
-
-
         {/* Cover Image */}
         {post.coverImageUrl && (
-          <div
-            style={{
-              marginBottom: "2rem",
-              borderRadius: "var(--radius-md)",
-              overflow: "hidden",
-            }}
-          >
+          <div className="mb-8 rounded-md overflow-hidden">
             <img
               src={post.coverImageUrl}
               alt={post.title}
-              style={{
-                width: "100%",
-                maxHeight: 500,
-                objectFit: "cover",
-              }}
+              className="w-full max-h-[500px] object-cover"
             />
           </div>
         )}
@@ -160,15 +109,9 @@ export default async function PostPage({
         {/* Media Gallery */}
         {post.mediaUrls && post.mediaUrls.length > 0 && (
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                post.mediaUrls.length === 1
-                  ? "1fr"
-                  : "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "0.75rem",
-              marginBottom: "2rem",
-            }}
+            className={`grid gap-3 mb-8 ${
+              post.mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"
+            }`}
           >
             {post.mediaUrls.map((media, i) =>
               media.type === "video" ? (
@@ -176,22 +119,14 @@ export default async function PostPage({
                   key={i}
                   src={media.url}
                   controls
-                  style={{
-                    width: "100%",
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--bg-tertiary)",
-                  }}
+                  className="w-full rounded-md bg-bg-tertiary"
                 />
               ) : (
                 <img
                   key={i}
                   src={media.url}
                   alt={`Media ${i + 1}`}
-                  style={{
-                    width: "100%",
-                    borderRadius: "var(--radius-md)",
-                    objectFit: "cover",
-                  }}
+                  className="w-full rounded-md object-cover"
                 />
               )
             )}
@@ -199,34 +134,17 @@ export default async function PostPage({
         )}
 
         {/* Content - Single Column reading view (matches editor) */}
-        <div style={{ marginTop: "2rem" }}>
+        <div className="mt-8">
           <PretextArticle content={post.content} columnCount={1} />
         </div>
 
         {post.tags && post.tags.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.5rem",
-              marginTop: "2rem",
-            }}
-          >
+          <div className="flex flex-wrap gap-2 mt-8">
             {post.tags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tag/${tag}`}
-                style={{
-                  padding: "0.25rem 0.75rem",
-                  fontSize: "0.75rem",
-                  background: "var(--bg-tertiary)",
-                  border: "1px solid var(--border-color)",
-                  borderRadius: 100,
-                  color: "var(--text-secondary)",
-                  textDecoration: "none",
-                  transition: "all 0.2s ease"
-                }}
-                className="tag-pill-hover"
+                className="feed-tag-pill tag-pill-hover"
               >
                 #{tag}
               </Link>
@@ -235,7 +153,7 @@ export default async function PostPage({
         )}
 
         {/* Engagement */}
-        <div style={{ marginTop: "2rem" }}>
+        <div className="mt-8">
           <EngagementBar
             postId={id}
             likeCount={post.likeCount}

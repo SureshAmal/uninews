@@ -22,34 +22,22 @@ export default async function HomePage() {
   const user = await getCurrentUser();
 
   return (
-    <div style={{ width: "100%", padding: "1rem clamp(1rem, 5vw, 3rem) 4rem clamp(1rem, 5vw, 3rem)" }}>
+    <div className="w-full px-[clamp(1rem,5vw,3rem)] pt-4 pb-16">
       {/* Newspaper Masthead */}
       <Masthead />
 
       {/* Login CTA for non-authenticated users */}
       {!user && (
-        <div
-          style={{
-            margin: "1.5rem 0",
-            padding: "1rem 1.5rem",
-            background: "var(--accent-soft)",
-            borderRadius: "var(--radius-md)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-          }}
-        >
+        <div className="my-6 px-6 py-4 bg-accent-soft rounded-md flex items-center justify-between flex-wrap gap-3">
           <div>
-            <strong style={{ color: "var(--text-primary)" }}>
+            <strong className="text-primary">
               Have news to share?
             </strong>{" "}
-            <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+            <span className="text-secondary text-[0.875rem]">
               Log in to post stories, follow writers, and engage with your campus community.
             </span>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div className="flex gap-2">
             <Link href="/login" className="btn btn-ghost btn-sm">
               Log in
             </Link>
@@ -61,44 +49,23 @@ export default async function HomePage() {
       )}
 
       {dbError ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem 2rem",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}>
+        <div className="text-center py-16 px-8 color-tertiary">
+          <div className="mb-4 flex justify-center">
             <Unplug size={48} />
           </div>
-          <h3
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "1.5rem",
-              fontWeight: 600,
-              marginBottom: "0.5rem",
-              color: "var(--text-secondary)",
-            }}
-          >
+          <h3 className="font-heading text-2xl font-semibold mb-2 text-secondary">
             Database not connected
           </h3>
-          <p style={{ fontSize: "0.9375rem", maxWidth: 400, margin: "0 auto" }}>
+          <p className="text-[0.9375rem] max-w-[400px] mx-auto">
             Make sure PostgreSQL is running and run{" "}
-            <code
-              style={{
-                background: "var(--bg-tertiary)",
-                padding: "0.125rem 0.375rem",
-                borderRadius: 4,
-                fontSize: "0.8125rem",
-              }}
-            >
+            <code className="bg-bg-tertiary px-1.5 py-0.5 rounded text-[0.8125rem]">
               npx drizzle-kit push
             </code>{" "}
             to create the tables.
           </p>
         </div>
       ) : (
-        <div style={{ marginTop: "2rem" }}>
+        <div className="mt-8">
           <NewspaperFeed initialPosts={posts} currentUser={user} />
         </div>
       )}

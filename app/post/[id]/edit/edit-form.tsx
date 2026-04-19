@@ -64,17 +64,7 @@ export function EditPostForm({ post }: EditPostFormProps) {
   return (
     <>
       {state?.error && (
-        <div
-          style={{
-            padding: "0.75rem 1rem",
-            background: "rgba(196,30,58,0.08)",
-            border: "1px solid rgba(196,30,58,0.2)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--error)",
-            fontSize: "0.8125rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="p-3 bg-error-soft border border-error/20 rounded-sm text-error text-[0.8125rem] mb-4">
           {state.error}
         </div>
       )}
@@ -109,10 +99,10 @@ export function EditPostForm({ post }: EditPostFormProps) {
           type="file"
           accept="image/*"
           onChange={handleFileUpload}
-          style={{ display: "none" }}
+          className="hidden"
         />
 
-        <div style={{ maxWidth: 740, margin: "2rem auto", display: "grid", gap: "1.5rem" }}>
+        <div className="max-w-[740px] mx-auto my-8 grid gap-6">
           <div className="input-group">
             <label htmlFor="category" className="input-label">
               Category
@@ -147,11 +137,10 @@ export function EditPostForm({ post }: EditPostFormProps) {
 
         <button
           type="submit"
-          className="btn btn-primary btn-lg"
+          className="btn btn-primary btn-lg w-full mt-8"
           disabled={isPending}
-          style={{ width: "100%", marginTop: "2rem" }}
         >
-          {isPending ? "Saving..." : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Save size={20} /> Save Changes</span>}
+          {isPending ? "Saving..." : <span className="flex items-center justify-center gap-2"><Save size={20} /> Save Changes</span>}
         </button>
       </form>
     </>

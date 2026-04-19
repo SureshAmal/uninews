@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, FileText, Star, ArrowLeft, MessageSquare, Megaphone, ShieldAlert, LogOut } from "lucide-react";
-import "./admin.css";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,8 +41,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div style={{ marginTop: "auto", padding: "1rem" }}>
-          <Link href="/" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+        <div className="admin-sidebar-footer">
+          <Link href="/" className="btn btn-ghost btn-sm w-full flex justify-center">
             <ArrowLeft size={16} className="mr-1" /> Back to Site
           </Link>
         </div>

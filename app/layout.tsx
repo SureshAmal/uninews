@@ -5,7 +5,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ToastContainer } from "@/components/ui/toast";
 import { getCurrentUser } from "@/lib/auth/session";
-import { getActiveAnnouncement } from "@/app/actions/admin";
+import { getActiveAnnouncement } from "@/app/actions/admin"
+import { GlobalFooter } from "@/components/layout/global-footer";
 
 export const metadata: Metadata = {
   title: "UniNews — University News Platform",
@@ -48,48 +49,16 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <body className="layout-root">
         {announcement && (
-          <div style={{ background: "var(--warning)", color: "#000", padding: "0.5rem 1rem", textAlign: "center", fontWeight: 600, fontSize: "0.875rem" }}>
+          <div className="announcement-banner">
             {announcement.message}
           </div>
         )}
         <Navbar user={user} />
-        <main style={{ flex: 1 }}>{children}</main>
+        <main className="layout-main">{children}</main>
         <MobileNav user={user} />
-
-        {/* Footer */}
-        <footer
-          style={{
-            borderTop: "1px solid var(--border-light)",
-            padding: "2rem 0",
-            textAlign: "center",
-            fontSize: "0.75rem",
-            color: "var(--text-tertiary)",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          <div className="container-news">
-            <div
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "1.25rem",
-                fontWeight: 700,
-                marginBottom: "0.5rem",
-                color: "var(--text-secondary)",
-              }}
-            >
-              UniNews
-            </div>
-            <p>© {new Date().getFullYear()} UniNews. By students, for students.</p>
-          </div>
-        </footer>
+        <GlobalFooter />
         <ToastContainer />
       </body>
     </html>

@@ -34,41 +34,22 @@ export default async function ExplorePage({
   }
 
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
-    >
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "2rem",
-          fontWeight: 700,
-          marginBottom: "0.5rem",
-        }}
-      >
+    <div className="container-news animate-fade-in pt-8 pb-16">
+      <h1 className="font-heading text-[2rem] font-bold mb-2 mt-4">
         Explore
       </h1>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <p className="text-[0.875rem] text-tertiary mb-6">
         Discover stories from across campus
       </p>
 
       {/* Search */}
-      <form
-        style={{ marginBottom: "1.5rem" }}
-      >
+      <form className="mb-6">
         <input
           name="q"
           type="search"
-          className="input"
+          className="input max-w-[400px]"
           placeholder="Search posts..."
           defaultValue={q || ""}
-          style={{ maxWidth: 400 }}
         />
         {category !== "all" && (
           <input type="hidden" name="category" value={category} />
@@ -76,24 +57,16 @@ export default async function ExplorePage({
       </form>
 
       {/* Category Filter */}
-      <div
-        style={{
-          display: "flex",
-          gap: "0.375rem",
-          flexWrap: "wrap",
-          marginBottom: "2rem",
-        }}
-      >
+      <div className="flex gap-1.5 flex-wrap mb-8">
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.value}
             href={`/explore${cat.value === "all" ? "" : `?category=${cat.value}`}${q ? `${cat.value === "all" ? "?" : "&"}q=${encodeURIComponent(q)}` : ""}`}
-            className={`btn btn-sm ${
-              category === cat.value ||
-              (cat.value === "all" && category === "all")
+            className={`btn btn-sm ${category === cat.value ||
+                (cat.value === "all" && category === "all")
                 ? "btn-primary"
                 : "btn-secondary"
-            }`}
+              }`}
           >
             {cat.label}
           </Link>
@@ -102,40 +75,19 @@ export default async function ExplorePage({
 
       {/* Results */}
       {posts.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "4rem 2rem",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center" }}><Search size={48} /></div>
-          <h3
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "1.25rem",
-              fontWeight: 600,
-              marginBottom: "0.5rem",
-              color: "var(--text-secondary)",
-            }}
-          >
+        <div className="text-center py-16 px-8 text-tertiary">
+          <div className="mb-4 flex justify-center"><Search size={48} /></div>
+          <h3 className="font-heading text-xl font-semibold mb-2 text-secondary">
             No posts found
           </h3>
-          <p style={{ fontSize: "0.875rem" }}>
+          <p className="text-[0.875rem]">
             {q
               ? `No results for "${q}"`
               : "No posts in this category yet. Be the first to share!"}
           </p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-          className="stagger-children"
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6 stagger-children">
           {posts.map((post) => (
             <ArticleCard key={post.id} post={post} size="medium" />
           ))}

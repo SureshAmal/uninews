@@ -62,45 +62,19 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="container-news" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+    <div className="container-news pt-8 pb-16">
       <BackButton />
 
-      <div 
-        className="animate-fade-in" 
-        style={{ maxWidth: 740, margin: "2rem auto 0 auto" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "2rem",
-            fontWeight: 700,
-            marginBottom: "0.5rem",
-          }}
-        >
+      <div className="animate-fade-in max-w-[740px] mx-auto mt-2">
+        <h1 className="font-heading text-[2rem] font-bold mb-2">
           Write a Post
         </h1>
-        <p
-          style={{
-            fontSize: "0.875rem",
-            color: "var(--text-tertiary)",
-            marginBottom: "2rem",
-          }}
-        >
+        <p className="text-[0.875rem] text-tertiary mb-8">
           Share news, stories, and updates with your campus
         </p>
 
         {state?.error && (
-          <div
-            style={{
-              padding: "0.75rem 1rem",
-              background: "rgba(196,30,58,0.08)",
-              border: "1px solid rgba(196,30,58,0.2)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--error)",
-              fontSize: "0.8125rem",
-              marginBottom: "1rem",
-            }}
-          >
+          <div className="p-3 bg-error-soft border border-error/20 rounded-sm text-error text-[0.8125rem] mb-4">
             {state.error}
           </div>
         )}
@@ -133,10 +107,10 @@ export default function CreatePostPage() {
               type="file"
               accept="image/*"
               onChange={(e) => handleFileUpload(e, true)}
-              style={{ display: "none" }}
+              className="hidden"
             />
 
-            <div style={{ maxWidth: 740, margin: "2rem auto" }}>
+            <div className="max-w-[740px] mx-auto mt-8">
               {/* Category */}
               <div className="input-group">
                 <label htmlFor="category" className="input-label">
@@ -157,7 +131,7 @@ export default function CreatePostPage() {
               </div>
 
               {/* Tags */}
-              <div className="input-group" style={{ marginTop: "1rem" }}>
+              <div className="input-group mt-4">
                 <label htmlFor="tags" className="input-label">
                   Tags (comma-separated, no # needed)
                 </label>
@@ -172,11 +146,10 @@ export default function CreatePostPage() {
 
               <button
                 type="submit"
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary btn-lg w-full mt-10"
                 disabled={isPending}
-                style={{ width: "100%", marginTop: "2.5rem" }}
               >
-                {isPending ? "Publishing..." : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}><Rocket size={20} /> Publish Post</span>}
+                {isPending ? "Publishing..." : <span className="flex items-center justify-center gap-2"><Rocket size={20} /> Publish Post</span>}
               </button>
             </div>
           </form>

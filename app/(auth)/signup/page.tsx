@@ -12,44 +12,21 @@ export default function SignupPage() {
 
   return (
     <>
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "1.5rem",
-          fontWeight: 700,
-          marginBottom: "0.25rem",
-        }}
-      >
+      <h2 className="auth-header">
         Join UniNews
       </h2>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <p className="auth-subtext">
         Create your account and start posting
       </p>
 
       {state?.error && (
-        <div
-          style={{
-            padding: "0.75rem 1rem",
-            background: "rgba(196,30,58,0.08)",
-            border: "1px solid rgba(196,30,58,0.2)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--error)",
-            fontSize: "0.8125rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="auth-error-banner">
           {state.error}
         </div>
       )}
 
       <form action={formAction}>
-        <div style={{ display: "grid", gap: "0.875rem" }}>
+        <div className="grid gap-3.5">
           <div className="input-group">
             <label htmlFor="username" className="input-label">
               Username *
@@ -132,13 +109,7 @@ export default function SignupPage() {
             </select>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "0.75rem",
-            }}
-          >
+          <div className="grid grid-cols-2 gap-3">
             <div className="input-group">
               <label htmlFor="registrationNo" className="input-label">
                 Registration No.
@@ -169,26 +140,18 @@ export default function SignupPage() {
 
         <button
           type="submit"
-          className="btn btn-primary btn-lg"
+          className="btn btn-primary btn-lg w-full mt-6"
           disabled={isPending}
-          style={{ width: "100%", marginTop: "1.5rem" }}
         >
           {isPending ? "Creating account..." : "Create Account"}
         </button>
       </form>
 
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: "0.8125rem",
-          color: "var(--text-tertiary)",
-          marginTop: "1.5rem",
-        }}
-      >
+      <p className="auth-footer-text">
         Already have an account?{" "}
         <Link
           href="/login"
-          style={{ color: "var(--accent-text)", fontWeight: 500 }}
+          className="auth-footer-link"
         >
           Log in
         </Link>

@@ -20,81 +20,41 @@ export function ArticleCard({
 
   if (size === "hero") {
     return (
-      <Link
-        href={`/post/${post.id}`}
-        style={{ textDecoration: "none", color: "inherit" }}
-      >
-        <article
-          className="card"
-          style={{
-            display: "grid",
-            gridTemplateColumns: hasImage ? "1fr 1fr" : "1fr",
-            gap: 0,
-            overflow: "hidden",
-          }}
-        >
+      <Link href={`/post/${post.id}`} className="article-card-link">
+        <article className={`card article-card-hero ${hasImage ? "has-image" : ""}`}>
           {hasImage && (
             <div
-              style={{
-                aspectRatio: "16/10",
-                background: `url(${post.coverImageUrl}) center/cover`,
-                minHeight: 300,
-              }}
+              className="article-card-image-hero"
+              style={{ backgroundImage: `url(${post.coverImageUrl})` }}
             />
           )}
-          <div
-            style={{
-              padding: "2rem",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
+          <div className="article-card-body-hero">
+            <div className="flex items-center gap-3 mb-3">
               <span className={`badge ${getCategoryClass(post.category)}`}>{post.category}</span>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-tertiary)" }}>
+              <span className="text-[0.75rem] text-[var(--text-tertiary)]">
                 {timeAgo(post.createdAt)}
               </span>
             </div>
-            <h2 className="headline-hero" style={{ marginBottom: "0.75rem" }}>
+            <h2 className="headline-hero mb-3">
               {post.title}
             </h2>
-            <p
-              style={{
-                fontSize: "1.0625rem",
-                lineHeight: 1.6,
-                color: "var(--text-secondary)",
-                marginBottom: "1rem",
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
+            <p className="article-card-excerpt !text-[1.0625rem]">
               {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 200)}
             </p>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                fontSize: "0.8125rem",
-                color: "var(--text-tertiary)",
-              }}
-            >
+            <div className="article-card-meta !text-[0.8125rem]">
               <div className="avatar avatar-sm">
                 {post.author.avatarUrl ? (
-                  <img src={post.author.avatarUrl} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={post.author.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
                 ) : (
                   (post.author.displayName || post.author.username)[0].toUpperCase()
                 )}
               </div>
-              <span style={{ fontWeight: 500 }}>
+              <span className="font-medium">
                 {post.author.displayName || post.author.username}
               </span>
               <span>•</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Eye size={14} /> {post.viewCount}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Heart size={14} /> {post.likeCount}</span>
+              <span className="flex items-center gap-1"><Eye size={14} /> {post.viewCount}</span>
+              <span className="flex items-center gap-1"><Heart size={14} /> {post.likeCount}</span>
             </div>
           </div>
         </article>
@@ -104,59 +64,35 @@ export function ArticleCard({
 
   if (size === "large") {
     return (
-      <Link
-        href={`/post/${post.id}`}
-        style={{ textDecoration: "none", color: "inherit" }}
-      >
+      <Link href={`/post/${post.id}`} className="article-card-link">
         <article className="card column-break-avoid">
           {hasImage && (
             <div
-              style={{
-                aspectRatio: "16/9",
-                background: `url(${post.coverImageUrl}) center/cover`,
-              }}
+              className="article-card-image-standard"
+              style={{ backgroundImage: `url(${post.coverImageUrl})` }}
             />
           )}
-          <div style={{ padding: "1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+          <div className="article-card-body-standard">
+            <div className="flex items-center gap-2 mb-2">
               <span className={`badge ${getCategoryClass(post.category)}`}>{post.category}</span>
-              <span style={{ fontSize: "0.6875rem", color: "var(--text-tertiary)" }}>
+              <span className="text-[0.6875rem] text-[var(--text-tertiary)]">
                 {timeAgo(post.createdAt)}
               </span>
             </div>
-            <h3 className="headline-large" style={{ marginBottom: "0.5rem" }}>
+            <h3 className="headline-large mb-2">
               {post.title}
             </h3>
-            <p
-              style={{
-                fontSize: "0.9375rem",
-                lineHeight: 1.6,
-                color: "var(--text-secondary)",
-                marginBottom: "0.75rem",
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
+            <p className="article-card-excerpt">
               {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 150)}
             </p>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                fontSize: "0.75rem",
-                color: "var(--text-tertiary)",
-              }}
-            >
-              <span style={{ fontWeight: 500 }}>
+            <div className="article-card-meta">
+              <span className="font-medium">
                 {post.author.displayName || post.author.username}
               </span>
               <span>•</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Eye size={14} /> {post.viewCount}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Heart size={14} /> {post.likeCount}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Repeat2 size={14} /> {post.repostCount}</span>
+              <span className="flex items-center gap-1"><Eye size={14} /> {post.viewCount}</span>
+              <span className="flex items-center gap-1"><Heart size={14} /> {post.likeCount}</span>
+              <span className="flex items-center gap-1"><Repeat2 size={14} /> {post.repostCount}</span>
             </div>
           </div>
         </article>
@@ -166,56 +102,21 @@ export function ArticleCard({
 
   if (size === "compact") {
     return (
-      <Link
-        href={`/post/${post.id}`}
-        style={{ textDecoration: "none", color: "inherit" }}
-      >
-        <article
-          style={{
-            display: "flex",
-            gap: "0.75rem",
-            padding: "0.75rem 0",
-            borderBottom: "1px solid var(--border-light)",
-            transition: "background 0.2s",
-          }}
-        >
+      <Link href={`/post/${post.id}`} className="article-card-link">
+        <article className="article-card-compact">
           {hasImage && (
             <div
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: "var(--radius-sm)",
-                background: `url(${post.coverImageUrl}) center/cover`,
-                flexShrink: 0,
-              }}
+              className="article-card-image-compact"
+              style={{ backgroundImage: `url(${post.coverImageUrl})` }}
             />
           )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h4
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                fontFamily: "var(--font-heading)",
-                lineHeight: 1.3,
-                marginBottom: "0.25rem",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
+          <div className="flex-1 min-w-0">
+            <h4 className="article-card-title-compact">
               {post.title}
             </h4>
-            <div
-              style={{
-                fontSize: "0.6875rem",
-                color: "var(--text-tertiary)",
-                display: "flex",
-                gap: "0.5rem",
-              }}
-            >
+            <div className="text-[0.6875rem] text-[var(--text-tertiary)] flex gap-2">
               <span>{timeAgo(post.createdAt)}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Eye size={12} /> {post.viewCount}</span>
+              <span className="flex items-center gap-1"><Eye size={12} /> {post.viewCount}</span>
             </div>
           </div>
         </article>
@@ -225,50 +126,26 @@ export function ArticleCard({
 
   // Default: medium
   return (
-    <Link
-      href={`/post/${post.id}`}
-      style={{ textDecoration: "none", color: "inherit" }}
-    >
+    <Link href={`/post/${post.id}`} className="article-card-link">
       <article className="card column-break-avoid">
         {hasImage && (
           <div
-            style={{
-              aspectRatio: "16/9",
-              background: `url(${post.coverImageUrl}) center/cover`,
-            }}
+            className="article-card-image-standard"
+            style={{ backgroundImage: `url(${post.coverImageUrl})` } as React.CSSProperties}
           />
         )}
-        <div style={{ padding: "1rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-1.5">
             <span className={`badge ${getCategoryClass(post.category)}`}>{post.category}</span>
           </div>
-          <h3 className="headline-medium" style={{ marginBottom: "0.375rem" }}>
+          <h3 className="headline-medium mb-1.5">
             {post.title}
           </h3>
-          <p
-            style={{
-              fontSize: "0.875rem",
-              lineHeight: 1.5,
-              color: "var(--text-secondary)",
-              marginBottom: "0.5rem",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
+          <p className="article-card-excerpt !mb-2 !-webkit-line-clamp-2 text-[0.875rem] leading-[1.5]">
             {stripHtml(post.excerpt || "") || stripHtml(post.content).substring(0, 120)}
           </p>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              fontSize: "0.75rem",
-              color: "var(--text-tertiary)",
-            }}
-          >
-            <span style={{ fontWeight: 500 }}>
+          <div className="article-card-meta">
+            <span className="font-medium">
               {post.author.displayName || post.author.username}
             </span>
             <span>•</span>

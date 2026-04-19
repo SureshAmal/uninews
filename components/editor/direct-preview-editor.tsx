@@ -116,8 +116,7 @@ export function DirectPreviewEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose-newspaper direct-preview-canvas",
-        style: "outline: none; min-height: 500px;",
+        class: "prose-newspaper direct-preview-canvas outline-none min-h-[500px]",
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
@@ -148,23 +147,8 @@ export function DirectPreviewEditor({
     <div className="direct-editor-container animate-fade-in">
       {/* Uploading Indicator */}
       {isUploading && (
-        <div style={{
-          position: "fixed",
-          bottom: "2rem",
-          right: "2rem",
-          background: "var(--accent)",
-          color: "white",
-          padding: "0.75rem 1.25rem",
-          borderRadius: "var(--radius-pill)",
-          boxShadow: "var(--shadow-lg)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          fontSize: "0.875rem",
-          fontWeight: 600
-        }}>
-          <div className="spinner-sm" style={{ borderTopColor: "white" }} />
+        <div className="editor-upload-indicator">
+          <div className="spinner-sm" />
           Uploading image...
         </div>
       )}
@@ -235,7 +219,7 @@ export function DirectPreviewEditor({
             <Palette size={18} />
           </button>
           {showColorPicker && (
-            <div className="color-picker-popup">
+            <div className="color-picker-popup z-10">
               {COLORS.map((c) => (
                 <button type="button"
                   key={c.name}
@@ -244,8 +228,8 @@ export function DirectPreviewEditor({
                     else editor.chain().focus().setColor(c.color).run();
                     setShowColorPicker(false);
                   }}
-                  className="color-swatch"
-                  style={{ backgroundColor: c.color.startsWith("var") ? `var(--text-primary)` : c.color, border: c.color === "inherit" ? "1px solid var(--border-color)" : "none" }}
+                  className={`color-swatch ${c.color === "inherit" ? "color-swatch-border" : ""}`}
+                  style={{ backgroundColor: c.color.startsWith("var") ? `var(--text-primary)` : c.color }}
                   title={c.name}
                 />
               ))}
@@ -268,13 +252,13 @@ export function DirectPreviewEditor({
             id="inline-image-input"
             type="file"
             accept="image/*"
-            style={{ display: "none" }}
+            className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) handleFileUpload(file);
             }}
           />
-          <div style={{ position: "relative" }}>
+          <div className="relative">
             <button
               type="button"
               onClick={() => setShowStickerPicker(!showStickerPicker)}
@@ -301,49 +285,18 @@ export function DirectPreviewEditor({
               </div>
             )}
           </div>
+        </div>
+
+        <div className="toolbar-divider" />
+
+        <div className="toolbar-group">
           <button type="button"
             onClick={() => editor.chain().focus().toggleMark("pill").run()}
             className={`toolbar-btn ${editor.isActive("pill") ? "active" : ""}`}
             title="Pill text"
           >
-            <div style={{ padding: "0 4px", fontSize: "10px", fontWeight: 700, border: "1px solid currentColor", borderRadius: 4 }}>PILL</div>
+            <div className="pill-text-trigger">PILL</div>
           </button>
-          <div style={{ position: "relative" }}>
-            <button
-              type="button"
-              onClick={() => {
-                setLinkUrl(editor.getAttributes("link").href || "");
-                setShowLinkPicker(!showLinkPicker);
-              }}
-              className={`toolbar-btn ${editor.isActive("link") ? "active" : ""}`}
-              title="Insert Link"
-            >
-              <LinkIcon size={18} />
-            </button>
-            {showLinkPicker && (
-              <div className="link-picker-popup">
-                <input
-                  type="text"
-                  placeholder="Paste or type link..."
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      const absoluteUrl = ensureAbsoluteUrl(linkUrl);
-                      if (absoluteUrl) {
-                        editor.chain().focus().setLink({ href: absoluteUrl }).run();
-                      } else {
-                        editor.chain().focus().unsetLink().run();
-                      }
-                      setShowLinkPicker(false);
-                    }
-                  }}
-                  autoFocus
-                  className="link-input"
-                />
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -358,43 +311,61 @@ export function DirectPreviewEditor({
         }}
       >
         <div className="bubble-menu">
-          <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "is-active" : ""}>Bold</button>
-          <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "is-active" : ""}>Italic</button>
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <button
-              type="button"
-              onClick={() => {
-                setLinkUrl(editor.getAttributes("link").href || "");
-                setShowLinkPicker(!showLinkPicker);
-              }}
-              className={editor.isActive("link") ? "is-active" : ""}
-            >
-              Link
-            </button>
-            {showLinkPicker && (
-              <div className="link-picker-popup" style={{ transform: "translateX(-50%)", bottom: "100%", top: "auto", marginBottom: "0.5rem" }}>
-                <input
-                  type="text"
-                  placeholder="Paste or type link..."
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      const absoluteUrl = ensureAbsoluteUrl(linkUrl);
-                      if (absoluteUrl) {
-                        editor.chain().focus().setLink({ href: absoluteUrl }).run();
-                      } else {
-                        editor.chain().focus().unsetLink().run();
-                      }
-                      setShowLinkPicker(false);
+          {!showLinkPicker ? (
+            <>
+              <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "is-active" : ""}>
+                <Bold size={18} />
+              </button>
+              <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "is-active" : ""}>
+                <Italic size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLinkUrl(editor.getAttributes("link").href || "");
+                  setShowLinkPicker(true);
+                }}
+                className={editor.isActive("link") ? "is-active" : ""}
+              >
+                <LinkIcon size={18} />
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 px-1">
+              <input
+                type="text"
+                placeholder="Paste or type link..."
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === "Enter") {
+                    const absoluteUrl = ensureAbsoluteUrl(linkUrl);
+                    if (absoluteUrl) {
+                      editor.chain().focus().setLink({ href: absoluteUrl }).run();
+                    } else {
+                      editor.chain().focus().unsetLink().run();
                     }
-                  }}
-                  autoFocus
-                  className="link-input"
-                />
-              </div>
-            )}
-          </div>
+                    setShowLinkPicker(false);
+                  } else if (e.key === "Escape") {
+                    setShowLinkPicker(false);
+                  }
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+                className="link-input"
+                style={{ width: "200px", minWidth: "150px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowLinkPicker(false)}
+                className="text-tertiary flex-shrink-0"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       </BubbleMenu>
 
@@ -413,11 +384,8 @@ export function DirectPreviewEditor({
         {/* Cover Image Placeholder */}
         <div
           onClick={onCoverImageClick}
-          className="editor-cover-placeholder"
-          style={{
-            backgroundImage: coverImage ? `url(${coverImage})` : "none",
-            height: coverImage ? "400px" : "120px"
-          }}
+          className={`editor-cover-placeholder ${coverImage ? "editor-cover-placeholder-filled" : "editor-cover-placeholder-empty"}`}
+          style={{ backgroundImage: coverImage ? `url(${coverImage})` : "none" }}
         >
           {!coverImage && (
             <div className="placeholder-content">
@@ -431,314 +399,6 @@ export function DirectPreviewEditor({
           <EditorContent editor={editor} />
         </div>
       </div>
-
-      <style jsx global>{`
-        .image-resizer-wrapper:hover .image-alignment-toolbar {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        .image-alignment-toolbar {
-          position: absolute;
-          top: 10px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(0,0,0,0.8);
-          padding: 4px;
-          border-radius: 8px;
-          display: flex;
-          gap: 4px;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.2s;
-          z-index: 50;
-        }
-        .image-alignment-toolbar button {
-          background: transparent;
-          border: none;
-          color: white;
-          padding: 4px;
-          cursor: pointer;
-          border-radius: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .image-alignment-toolbar button:hover, .image-alignment-toolbar button.active {
-          background: rgba(255,255,255,0.2);
-        }
-
-        .sticker-wrapper:hover .sticker-toolbar {
-          opacity: 1 !important;
-          visibility: visible !important;
-        }
-        .sticker-toolbar {
-          position: absolute;
-          bottom: 100%;
-          left: 50%;
-          transform: translateX(-50%) translateY(-5px);
-          background: rgba(0,0,0,0.8);
-          padding: 4px;
-          border-radius: 8px;
-          display: flex;
-          gap: 4px;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.2s;
-          z-index: 50;
-        }
-        .sticker-toolbar button {
-          background: transparent;
-          border: none;
-          color: white;
-          padding: 4px 8px;
-          cursor: pointer;
-          border-radius: 4px;
-          font-weight: bold;
-          font-size: 14px;
-          line-height: 1;
-        }
-        .sticker-toolbar button:hover {
-          background: rgba(255,255,255,0.2);
-        }
-
-        .direct-editor-container {
-          position: relative;
-          max-width: 800px;
-          margin: 0 auto;
-          background: var(--bg-primary);
-        }
-        .editor-sticky-toolbar {
-          position: sticky;
-          top: 80px;
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          padding: 0.5rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 100px;
-          box-shadow: var(--shadow-lg);
-          margin-bottom: 2rem;
-          width: fit-content;
-          margin-left: auto;
-          margin-right: auto;
-          transition: all 0.3s ease;
-        }
-
-        @media (max-width: 640px) {
-          .editor-sticky-toolbar {
-            top: 60px;
-            padding: 0.375rem;
-            border-radius: 12px;
-            width: 100%;
-            overflow-x: auto;
-            justify-content: flex-start;
-            gap: 0.125rem;
-          }
-          .toolbar-btn {
-            width: 28px !important;
-            height: 28px !important;
-          }
-          .toolbar-divider {
-             height: 16px !important;
-          }
-        }
-
-        .toolbar-group {
-          display: flex;
-          gap: 0.125rem;
-        }
-        .toolbar-btn {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          border: none;
-          background: transparent;
-          color: var(--text-secondary);
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .toolbar-btn:hover {
-          background: var(--bg-hover);
-          color: var(--text-primary);
-        }
-        .toolbar-btn.active {
-          background: var(--accent-soft);
-          color: var(--accent);
-        }
-        .toolbar-divider {
-          width: 1px;
-          height: 20px;
-          background: var(--border-color);
-          margin: 0 0.25rem;
-        }
-        .color-picker-popup {
-          position: absolute;
-          top: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          padding: 0.5rem;
-          border-radius: var(--radius-md);
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-          box-shadow: var(--shadow-md);
-        }
-        .sticker-picker-popup {
-          position: absolute;
-          top: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          padding: 0.5rem;
-          border-radius: var(--radius-md);
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 0.25rem;
-          margin-top: 0.5rem;
-          box-shadow: var(--shadow-md);
-          z-index: 100;
-        }
-        .sticker-option {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 4px;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          font-size: 1.25rem;
-          transition: background 0.2s;
-        }
-        .sticker-option:hover {
-          background: var(--bg-hover);
-        }
-        .link-picker-popup {
-          position: absolute;
-          top: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          padding: 0.5rem;
-          border-radius: var(--radius-md);
-          margin-top: 0.5rem;
-          box-shadow: var(--shadow-md);
-          z-index: 100;
-          min-width: 250px;
-        }
-        .link-input {
-          width: 100%;
-          background: var(--bg-primary);
-          border: 1px solid var(--border-color);
-          padding: 0.5rem;
-          border-radius: var(--radius-sm);
-          color: var(--text-primary);
-          outline: none;
-          font-size: 0.8125rem;
-        }
-        .color-swatch {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          border: none;
-          cursor: pointer;
-        }
-        .editor-canvas-wrapper {
-          padding: 2rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-light);
-          border-radius: var(--radius-lg);
-        }
-
-        @media (max-width: 640px) {
-          .editor-canvas-wrapper {
-            padding: 1rem;
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-          }
-          .editor-title-input {
-            font-size: 1.75rem !important;
-            margin-bottom: 1rem !important;
-          }
-          .editor-cover-placeholder {
-            height: 160px !important;
-          }
-        }
-
-        .editor-title-input {
-          width: 100%;
-          border: none;
-          background: transparent;
-          font-family: var(--font-heading);
-          font-size: 3rem;
-          font-weight: 900;
-          line-height: 1.1;
-          margin-bottom: 1.5rem;
-          outline: none;
-        }
-        .editor-title-input::placeholder {
-          color: var(--border-color);
-        }
-        .editor-cover-placeholder {
-          width: 100%;
-          background: var(--bg-tertiary);
-          border-radius: var(--radius-md);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          background-size: cover;
-          background-position: center;
-          margin-bottom: 2rem;
-          transition: all 0.2s;
-        }
-        .editor-cover-placeholder:hover {
-          opacity: 0.8;
-        }
-        .placeholder-content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          color: var(--text-tertiary);
-        }
-        .direct-preview-canvas {
-          font-family: var(--font-body);
-          font-size: 1.125rem;
-          line-height: 1.8;
-        }
-        .bubble-menu {
-          display: flex;
-          background-color: #0d0d0d;
-          padding: 0.2rem;
-          border-radius: 0.5rem;
-        }
-        .bubble-menu button {
-          border: none;
-          background: none;
-          color: #fff;
-          font-size: 0.85rem;
-          font-weight: 500;
-          padding: 0 0.5rem;
-          opacity: 0.7;
-          cursor: pointer;
-        }
-        .bubble-menu button:hover, .bubble-menu button.is-active {
-          opacity: 1;
-        }
-      `}</style>
     </div>
   );
 }

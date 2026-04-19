@@ -3,70 +3,24 @@ import { FileQuestion } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{
-        paddingTop: "6rem",
-        paddingBottom: "6rem",
-        textAlign: "center",
-        minHeight: "60vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          background: "var(--accent-soft)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "1.5rem",
-        }}
-      >
-        <FileQuestion size={36} style={{ color: "var(--accent)" }} />
+    <div className="container-news animate-fade-in py-24 text-center min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="w-20 h-20 rounded-full bg-accent-soft flex items-center justify-center mb-6">
+        <FileQuestion size={36} className="text-accent" />
       </div>
 
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "3rem",
-          fontWeight: 900,
-          marginBottom: "0.5rem",
-          letterSpacing: "-0.02em",
-        }}
-      >
+      <h1 className="font-heading text-5xl font-black mb-2 tracking-tight">
         404
       </h1>
 
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "1.25rem",
-          fontWeight: 600,
-          marginBottom: "0.75rem",
-          color: "var(--text-secondary)",
-        }}
-      >
+      <h2 className="font-heading text-xl font-semibold mb-3 text-secondary">
         Page Not Found
       </h2>
 
-      <p
-        style={{
-          fontSize: "0.9375rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "2rem",
-          maxWidth: 400,
-        }}
-      >
+      <p className="text-[0.9375rem] text-tertiary mb-8 max-w-[400px]">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
       </p>
 
-      <div style={{ display: "flex", gap: "0.75rem" }}>
+      <div className="flex gap-3">
         <Link href="/" className="btn btn-primary">
           Back to Home
         </Link>

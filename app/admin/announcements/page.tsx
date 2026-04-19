@@ -53,7 +53,7 @@ export default async function AdminAnnouncementsPage() {
                 This message will appear at the top of the homepage for all users.
               </p>
             </div>
-            <button type="submit" className="btn btn-primary w-full h-11">
+            <button type="submit" className="btn btn-primary w-fit px-8 h-11">
               Broadcast Now
             </button>
           </form>

@@ -36,41 +36,17 @@ export default async function ProfilePage({
   }));
 
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
-    >
+    <div className="container-news animate-fade-in pt-8 pb-16">
       <BackButton />
       {/* Profile Header */}
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          alignItems: "flex-start",
-          marginBottom: "2.5rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex gap-8 items-start mb-10 flex-wrap">
         {/* Avatar */}
-        <div
-          className="avatar avatar-xl"
-          style={{
-            fontSize: "2.5rem",
-            width: 100,
-            height: 100,
-            border: "3px solid var(--border-color)",
-          }}
-        >
+        <div className="avatar avatar-xl text-4xl w-[100px] h-[100px] border-[3px] border-divider">
           {profile.avatarUrl ? (
             <img
               src={profile.avatarUrl}
               alt=""
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
+              className="w-full h-full rounded-full object-cover"
             />
           ) : (
             (profile.displayName || profile.username)[0].toUpperCase()
@@ -78,23 +54,9 @@ export default async function ProfilePage({
         </div>
 
         {/* Info */}
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              marginBottom: "0.5rem",
-              flexWrap: "wrap",
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "1.75rem",
-                fontWeight: 700,
-              }}
-            >
+        <div className="flex-1 min-w-[200px]">
+          <div className="flex items-center gap-4 mb-2 flex-wrap">
+            <h1 className="font-heading text-[1.75rem] font-bold">
               {profile.displayName || profile.username}
             </h1>
             {isOwnProfile ? (
@@ -102,7 +64,7 @@ export default async function ProfilePage({
                 href="/profile/edit"
                 className="btn btn-secondary btn-sm"
               >
-                <Settings size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Edit Profile
+                <Settings size={16} className="inline mr-1" /> Edit Profile
               </Link>
             ) : currentUser ? (
               <FollowButton
@@ -112,13 +74,7 @@ export default async function ProfilePage({
             ) : null}
           </div>
 
-          <p
-            style={{
-              fontSize: "0.9375rem",
-              color: "var(--text-tertiary)",
-              marginBottom: "0.75rem",
-            }}
-          >
+          <p className="text-[0.9375rem] text-tertiary mb-3">
             @{profile.username}
             {profile.collegeYears && (
               <span> · Year {profile.collegeYears}</span>
@@ -126,51 +82,36 @@ export default async function ProfilePage({
           </p>
 
           {profile.bio && (
-            <p
-              style={{
-                fontSize: "0.9375rem",
-                color: "var(--text-secondary)",
-                marginBottom: "1rem",
-                maxWidth: 500,
-              }}
-            >
+            <p className="text-[0.9375rem] text-secondary mb-4 max-w-[500px]">
               {profile.bio}
             </p>
           )}
 
           {/* Stats */}
-          <div
-            style={{
-              display: "flex",
-              gap: "1.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
+          <div className="flex gap-6 text-[0.875rem]">
             <div>
-              <strong style={{ color: "var(--text-primary)" }}>
+              <strong className="text-primary">
                 {profile.postCount}
               </strong>{" "}
-              <span style={{ color: "var(--text-tertiary)" }}>posts</span>
+              <span className="text-tertiary">posts</span>
             </div>
             <Link
               href={`/profile/${profile.username}/social?tab=followers`}
-              className="hover-underline"
-              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+              className="hover-underline !no-underline !text-inherit cursor-pointer"
             >
-              <strong style={{ color: "var(--text-primary)" }}>
+              <strong className="text-primary">
                 {profile.followerCount}
               </strong>{" "}
-              <span style={{ color: "var(--text-tertiary)" }}>followers</span>
+              <span className="text-tertiary">followers</span>
             </Link>
             <Link
               href={`/profile/${profile.username}/social?tab=following`}
-              className="hover-underline"
-              style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+              className="hover-underline !no-underline !text-inherit cursor-pointer"
             >
-              <strong style={{ color: "var(--text-primary)" }}>
+              <strong className="text-primary">
                 {profile.followingCount}
               </strong>{" "}
-              <span style={{ color: "var(--text-tertiary)" }}>following</span>
+              <span className="text-tertiary">following</span>
             </Link>
           </div>
         </div>
@@ -180,33 +121,19 @@ export default async function ProfilePage({
       <div className="section-divider">Posts</div>
 
       {displayPosts.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "3rem",
-            color: "var(--text-tertiary)",
-          }}
-        >
+        <div className="text-center p-12 text-tertiary">
           <p>No posts yet.</p>
           {isOwnProfile && (
             <Link
               href="/create"
-              className="btn btn-primary"
-              style={{ marginTop: "1rem" }}
+              className="btn btn-primary mt-4"
             >
-              <PenLine size={16} style={{ display: "inline", marginRight: "0.25rem" }} /> Write your first post
+              <PenLine size={16} className="inline mr-1" /> Write your first post
             </Link>
           )}
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-          className="stagger-children"
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6 stagger-children">
           {displayPosts.map((post) => (
             <ArticleCard key={post.id} post={post} size="medium" />
           ))}

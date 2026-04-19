@@ -77,8 +77,7 @@ export function AdminCommentsClient({ data, search, page }: any) {
                 <td className="text-right">
                   <button 
                     onClick={() => handleDelete(c.id)}
-                    className="admin-action-btn-ghost ml-auto text-error"
-                    style={{ background: "rgba(196,30,58,0.05)" }}
+                    className="admin-action-btn-ghost ml-auto text-[var(--error)] bg-red-950/5 hover:bg-red-950/10"
                     title="Delete Comment"
                   >
                     <Trash2 size={14} />
@@ -103,8 +102,7 @@ export function AdminCommentsClient({ data, search, page }: any) {
               <Link
                 key={i}
                 href={`?${current.toString()}`}
-                className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
-                style={{ width: 36, padding: 0, justifyContent: "center", display: "flex", alignItems: "center" }}
+                className={`btn btn-sm w-9 p-0 flex items-center justify-center ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
               >
                 {i + 1}
               </Link>

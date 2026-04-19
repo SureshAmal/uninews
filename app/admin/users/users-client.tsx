@@ -129,7 +129,7 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
         <div className="admin-bulk-bar">
           <span className="admin-bulk-text">{selectedUsers.size} users selected</span>
           <div className="flex gap-2">
-            <button onClick={handleBulkDelete} className="btn btn-sm btn-ghost" style={{ background: "rgba(196,30,58,0.1)", color: "var(--error)" }}>
+            <button onClick={handleBulkDelete} className="btn btn-sm btn-ghost bg-red-900/10 text-[var(--error)]">
               <Trash2 size={14} className="mr-1" /> Bulk Delete
             </button>
           </div>
@@ -166,13 +166,11 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
                 </td>
                 <td>
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-tertiary overflow-hidden relative">
+                    <div className="w-6 h-6 rounded-full overflow-hidden relative admin-table-avatar">
                       {user.avatarUrl ? (
                         <Image src={user.avatarUrl} alt="" fill className="object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center font-bold text-tertiary text-[0.75rem]">
-                          {user.username.charAt(0).toUpperCase()}
-                        </div>
+                        user.username.charAt(0).toUpperCase()
                       )}
                     </div>
                     <a href={`/profile/${user.username}`} target="_blank" className="font-bold text-primary no-underline hover:underline">
@@ -198,8 +196,7 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
                     {!user.isAdmin && (
                       <button 
                         onClick={() => handleToggleSuspension(user.id)} 
-                        className="admin-action-btn-ghost" 
-                        style={{ color: user.isSuspended ? "var(--success)" : "var(--error)" }}
+                        className={`admin-action-btn-ghost ${user.isSuspended ? "text-[var(--success)]" : "text-[var(--error)]"}`}
                         title={user.isSuspended ? "Restore" : "Suspend"}
                       >
                         {user.isSuspended ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
@@ -209,10 +206,10 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
                       <button className="admin-action-btn-ghost"><MoreVertical size={14} /></button>
                       <div className="admin-hover-menu">
                         <button onClick={() => handleToggleRole(user.id, user.isAdmin)} className="admin-menu-item">
-                          <Shield size={16} className="text-accent" /> {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                          <Shield size={16} className="text-[var(--accent)]" /> {user.isAdmin ? "Remove Admin" : "Make Admin"}
                         </button>
                         <button onClick={() => handleResetPassword(user.id)} className="admin-menu-item">
-                          <KeyRound size={16} className="text-accent" /> Reset Password
+                          <KeyRound size={16} className="text-[var(--accent)]" /> Reset Password
                         </button>
                         {!user.isAdmin && (
                           <button onClick={() => handleDelete(user.id)} className="admin-menu-item admin-menu-item-danger">
@@ -239,8 +236,7 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
               <Link
                 key={i}
                 href={`?${current.toString()}`}
-                className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
-                style={{ width: 36, padding: 0, justifyContent: "center", display: "flex", alignItems: "center" }}
+                className={`btn btn-sm w-9 p-0 flex items-center justify-center ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
               >
                 {i + 1}
               </Link>
@@ -326,7 +322,7 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
 
               <div className="input-group"><label className="input-label">Display Name</label><input type="text" name="displayName" className="input" defaultValue={editingUser.displayName || ""} /></div>
               
-              <div className="admin-grid gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="input-group"><label className="input-label">Registration No</label><input type="text" name="registrationNo" className="input" defaultValue={editingUser.registrationNo || ""} /></div>
                 <div className="input-group"><label className="input-label">Enrollment No</label><input type="text" name="enrollmentNo" className="input" defaultValue={editingUser.enrollmentNo || ""} /></div>
               </div>
@@ -342,12 +338,26 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
   );
 }
 
+import { Anchor } from "lucide-react";
+
 function InlineUserStatus({ user }: { user: any }) {
   const [loading, setLoading] = useState(false);
-  const handleInlineChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!confirm("Confirm status change?")) return;
-    const val = e.target.value;
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleStatusUpdate = async (val: string) => {
+    if (val === (user.isSuspended ? "suspended" : user.isAdmin ? "admin" : "active")) {
+      setIsOpen(false);
+      return;
+    }
+    
+    if (!confirm("Confirm status change?")) {
+      setIsOpen(false);
+      return;
+    }
+    
     setLoading(true);
+    setIsOpen(false);
+    
     if (val === "suspended" && !user.isSuspended) {
       if (user.isAdmin) await adminSetRole(user.id, false);
       await toggleUserSuspension(user.id);
@@ -363,16 +373,32 @@ function InlineUserStatus({ user }: { user: any }) {
 
   const curr = user.isSuspended ? "suspended" : user.isAdmin ? "admin" : "active";
   const statusClass = curr === "suspended" ? "status-suspended" : curr === "admin" ? "status-admin" : "status-active";
+  
   if (loading) return <span className="text-[0.7rem] text-tertiary">Saving...</span>;
 
   return (
-    <div className="admin-status-wrapper">
-      <select value={curr} onChange={handleInlineChange} className={`admin-status-select ${statusClass}`}>
-        <option value="active">ACTIVE</option>
-        <option value="admin">ADMIN</option>
-        <option value="suspended">SUSPENDED</option>
-      </select>
-      <span className={`admin-status-arrow ${curr === "admin" ? "text-info" : ""}`}>▼</span>
+    <div className="admin-status-dropdown">
+      <div 
+        className={`admin-status-display ${statusClass}`} 
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-1.5">
+          <Anchor size={12} className="opacity-50" />
+          <span>{curr.toUpperCase()}</span>
+        </div>
+        <span className="text-[10px] ml-2">▼</span>
+      </div>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="admin-status-menu">
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("active")}>ACTIVE</button>
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("admin")}>ADMIN</button>
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("suspended")}>SUSPENDED</button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

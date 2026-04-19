@@ -13,16 +13,10 @@ export function BackButton({ label = "Back" }: BackButtonProps) {
   return (
     <button
       onClick={() => router.back()}
-      className="btn-back"
+      className="btn-back no-print"
     >
       <ArrowLeft size={16} />
       <span>{label}</span>
-      
-      <style>{`
-        @media print {
-          button { display: none; }
-        }
-      `}</style>
     </button>
   );
 }

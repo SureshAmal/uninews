@@ -50,70 +50,27 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "4rem", /* Above mobile nav */
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.75rem",
-        alignItems: "center",
-        pointerEvents: "none",
-        width: "90%",
-        maxWidth: "400px",
-      }}
-    >
+    <div className="toast-container">
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="m3-toast animate-slide-up"
-          style={{
-            pointerEvents: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            padding: "0.875rem 1rem",
-            background: "var(--bg-card)",
-            borderRadius: "0.75rem",
-            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-            border: "1px solid var(--border-light)",
-            width: "100%",
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
+          className="toast-item animate-slide-up"
         >
           {/* Icon */}
-          <div style={{ flexShrink: 0, display: "flex" }}>
-            {t.type === "success" && <CheckCircle size={20} style={{ color: "var(--success)" }} />}
-            {t.type === "warning" && <AlertCircle size={20} style={{ color: "var(--warning)" }} />}
-            {t.type === "error" && <AlertCircle size={20} style={{ color: "var(--error)" }} />}
-            {t.type === "info" && <Info size={20} style={{ color: "var(--accent)" }} />}
+          <div className="toast-icon-wrapper">
+            {t.type === "success" && <CheckCircle size={20} className="text-success" />}
+            {t.type === "warning" && <AlertCircle size={20} className="text-warning" />}
+            {t.type === "error" && <AlertCircle size={20} className="text-error" />}
+            {t.type === "info" && <Info size={20} className="text-accent" />}
           </div>
 
           {/* Content */}
-          <div style={{ flex: 1 }}>
-            <p
-              style={{
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: 0,
-                fontFamily: "var(--font-heading)",
-              }}
-            >
+          <div className="toast-content">
+            <p className="toast-title">
               {t.title}
             </p>
             {t.message && (
-              <p
-                style={{
-                  fontSize: "0.8125rem",
-                  color: "var(--text-secondary)",
-                  margin: "0.125rem 0 0 0",
-                  lineHeight: 1.4,
-                }}
-              >
+              <p className="toast-message">
                 {t.message}
               </p>
             )}
@@ -122,20 +79,7 @@ export function ToastContainer() {
           {/* Close */}
           <button
             onClick={() => toast.dismiss(t.id)}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--text-tertiary)",
-              padding: "0.25rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "50%",
-              transition: "background 0.2s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-secondary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
+            className="toast-close-btn"
           >
             <X size={16} />
           </button>

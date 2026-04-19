@@ -25,30 +25,14 @@ export default async function EditPostPage({
   if (post.authorId !== user.userId) redirect("/");
 
   return (
-    <div className="container-news" style={{ paddingTop: "2rem", paddingBottom: "4rem" }}>
+    <div className="container-news pt-8 pb-16">
       <BackButton />
       
-      <div 
-        className="animate-fade-in" 
-        style={{ maxWidth: 740, margin: "2rem auto 0 auto" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "2rem",
-            fontWeight: 700,
-            marginBottom: "0.5rem",
-          }}
-        >
+      <div className="animate-fade-in max-w-[740px] mx-auto mt-8">
+        <h1 className="font-heading text-[2rem] font-bold mb-2">
           Edit Post
         </h1>
-        <p
-          style={{
-            fontSize: "0.875rem",
-            color: "var(--text-tertiary)",
-            marginBottom: "2rem",
-          }}
-        >
+        <p className="text-[0.875rem] text-tertiary mb-8">
           Update your story
         </p>
 

@@ -14,7 +14,7 @@ export function Masthead() {
   return (
     <header className="masthead">
       <h1 className="masthead-title">UniNews</h1>
-      <div className="masthead-meta" style={{ marginTop: "0.25rem" }}>
+      <div className="masthead-meta masthead-meta-editorial">
         <span>{dateStr}</span>
         <span>•</span>
         <span>Edition #{editionNo}</span>

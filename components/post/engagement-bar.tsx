@@ -66,16 +66,7 @@ export function EngagementBar({
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "0.25rem",
-        padding: "0.5rem 0",
-        borderTop: "1px solid var(--border-light)",
-        borderBottom: "1px solid var(--border-light)",
-      }}
-    >
+    <div className="engagement-bar-container">
       <button
         onClick={handleLike}
         className={`engagement-btn ${liked ? "active" : ""}`}
@@ -105,17 +96,9 @@ export function EngagementBar({
         <span>{saves}</span>
       </button>
 
-      <div style={{ flex: 1 }} />
+      <div className="flex-1" />
 
-      <span
-        style={{
-          fontSize: "0.75rem",
-          color: "var(--text-tertiary)",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.25rem",
-        }}
-      >
+      <span className="engagement-bar-meta">
         <Eye size={16} /> {viewCount} views
       </span>
     </div>

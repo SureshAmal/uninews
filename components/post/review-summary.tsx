@@ -11,21 +11,9 @@ interface ReviewSummaryProps {
 
 export function ReviewSummary({ avgRating, reviewCount, onWriteReview, isLoggedIn }: ReviewSummaryProps) {
   return (
-    <div 
-      style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "1.25rem",
-        marginBottom: "2rem",
-        padding: "0.75rem 1rem",
-        background: "var(--bg-secondary)",
-        border: "1px solid var(--border-light)",
-        borderRadius: "var(--radius-md)",
-        width: "fit-content"
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <div style={{ display: "flex", gap: "0.125rem" }}>
+    <div className="flex items-center gap-5 mb-8 px-4 py-3 bg-secondary border border-divider rounded-md w-fit">
+      <div className="flex items-center gap-2">
+        <div className="flex gap-[0.0625rem]">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star 
               key={star} 
@@ -36,14 +24,14 @@ export function ReviewSummary({ avgRating, reviewCount, onWriteReview, isLoggedI
             />
           ))}
         </div>
-        <span style={{ fontWeight: 700, fontSize: "1.125rem", color: "var(--text-primary)" }}>
+        <span className="font-bold text-[1.125rem] text-primary">
           {reviewCount > 0 ? avgRating.toFixed(1) : "No reviews"}
         </span>
       </div>
 
-      <div style={{ width: 1, height: 20, background: "var(--divider)" }} />
+      <div className="w-[1px] h-5 bg-divider" />
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+      <div className="flex items-center gap-1.5 text-secondary text-[0.875rem]">
         <MessageSquare size={16} />
         <span>{reviewCount} {reviewCount === 1 ? "Review" : "Reviews"}</span>
       </div>
@@ -51,8 +39,7 @@ export function ReviewSummary({ avgRating, reviewCount, onWriteReview, isLoggedI
       {isLoggedIn && (
         <button 
           onClick={onWriteReview}
-          className="btn btn-primary btn-sm"
-          style={{ marginLeft: "0.5rem" }}
+          className="btn btn-primary btn-sm ml-2"
         >
           Write a Review
         </button>

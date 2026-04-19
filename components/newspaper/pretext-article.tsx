@@ -293,99 +293,82 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
   return (
     <div
       ref={containerRef}
-      className="pretext-article-container"
+      className="pretext-article-root"
       style={{
-        width: "100%",
         height: layoutData ? `${layoutData.maxHeight}px` : "auto",
-        position: "relative",
-        fontFamily: "var(--font-body)",
-        lineHeight: 1.6,
-        overflow: "hidden"
-      }}
+      } as React.CSSProperties}
     >
-      {layoutData && layoutData.actualColumnCount > 1 && Array.from({ length: layoutData.actualColumnCount - 1 }).map((_, i) => (
-        <div
-          key={`divider-${i}`}
-          style={{
-            position: "absolute",
-            left: Math.round((i + 1) * (layoutData.colWidth + layoutData.COLUMN_GAP) - layoutData.COLUMN_GAP / 2),
-            top: 0,
-            bottom: 0,
-            width: "1px",
-            backgroundColor: "var(--border-color, rgba(0, 0, 0, 0.1))",
-            zIndex: 1
-          }}
-        />
-      ))}
+      {layoutData && layoutData.actualColumnCount > 1 && Array.from({ length: layoutData.actualColumnCount - 1 }).map((_, i) => {
+        const dividerX = Math.round((i + 1) * (layoutData.colWidth + layoutData.COLUMN_GAP) - layoutData.COLUMN_GAP / 2);
+        return (
+          <div
+            key={`divider-${i}`}
+            className="pretext-column-divider"
+            style={{ "--x": `${dividerX}px` } as React.CSSProperties}
+          />
+        );
+      })}
 
       {layoutData && layoutData.placedObstacles.map((obs: any, i: number) => (
         <div
           key={`obs-${i}`}
+          className="pretext-obstacle"
           style={{
-            position: "absolute",
-            left: obs.x,
-            top: obs.y,
-            width: obs.width + "px",
-            height: obs.height + "px",
-            zIndex: 5,
-            borderRadius: "12px",
-            overflow: "hidden",
-            boxShadow: "var(--shadow-md)"
-          }}
+            "--x": `${obs.x}px`,
+            "--y": `${obs.y}px`,
+            "--w": `${obs.width}px`,
+            "--h": `${obs.height}px`,
+          } as React.CSSProperties}
         >
-          <img src={obs.src} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={obs.src} className="pretext-obstacle-img" alt="Illustration" />
         </div>
       ))}
 
       {layoutData && layoutData.renderedLines.map((line: any, i: number) => (
         <div
           key={i}
+          className="pretext-line"
           style={{
-            position: "absolute",
-            left: line.x,
-            top: line.y,
-            width: line.width + 20,
-            height: line.height,
-            whiteSpace: "pre",
-            fontSize: "17px",
-            color: "var(--text-secondary)",
-            fontFamily: "Georgia, serif",
+            "--x": `${line.x}px`,
+            "--y": `${line.y}px`,
+            "--w": `${line.width + 20}px`,
+            "--h": `${line.height}px`,
             visibility: line.isHidden ? "hidden" : "visible",
-            display: "flex", 
-            alignItems: "baseline"
-          }}
+          } as React.CSSProperties}
         >
           {line.fragments.map((f: any, fi: number) => {
             const meta = layoutData.metadataMap[f.itemIndex] || {};
             const itemFont = layoutData.items[f.itemIndex]?.font || "400 17px Georgia";
-            const style: React.CSSProperties = { 
-                color: meta.color || "inherit",
-                background: meta.background || "none",
-                padding: meta.isPill ? "2px 8px" : "0",
-                borderRadius: meta.isPill ? "100px" : "0",
-                textDecoration: meta.textDecoration || "none",
-                marginLeft: f.gapBefore + "px", 
-                transform: meta.isPill ? "translateY(-1px)" : "none",
-                verticalAlign: meta.isInlineImage ? "-20%" : "baseline"
+            
+            const varStyle: any = {
+                "--gap": `${f.gapBefore}px`,
             };
 
-            // Parse the font shorthand into safe longhand properties to avoid React conflicts
+            // Font & Visual metadata to CSS variables
+            if (meta.color) varStyle["--f-color"] = meta.color;
+            if (meta.background) varStyle["--f-bg"] = meta.background;
+            if (meta.textDecoration) varStyle["--f-decor"] = meta.textDecoration;
+            
             const fontParts = itemFont.split(" ");
             if (fontParts.length >= 3) {
-              style.fontWeight = meta.fontWeight || fontParts[0];
-              style.fontSize = meta.isPill ? "14px" : fontParts[1];
-              style.fontFamily = fontParts.slice(2).join(" ");
-            } else {
-              style.font = itemFont;
+                varStyle["--f-weight"] = meta.fontWeight || fontParts[0];
+                varStyle["--f-size"] = meta.isPill ? "14px" : fontParts[1];
+                varStyle["--f-family"] = fontParts.slice(2).join(" ");
             }
 
             if (meta.isInlineImage) {
                 return (
-                    <span key={fi} style={{...style, display: "inline-block", position: "relative", width: parseInt(meta.width || "0")}}>
-                      <img src={meta.src} style={{ width: "100%", height: "auto", borderRadius: "12px", verticalAlign: "middle", display: "inline-block" }} />
+                    <span 
+                      key={fi} 
+                      className="pretext-fragment-img-wrapper"
+                      style={{ ...varStyle, "--w": `${meta.width}px` } as React.CSSProperties}
+                    >
+                      <img src={meta.src} className="pretext-fragment-img" alt="Inline" />
                     </span>
                 )
             }
+
+            const fragmentClass = `pretext-fragment ${meta.isPill ? "pretext-pill" : ""}`;
 
             if (meta.isLink) {
                 return (
@@ -394,7 +377,8 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
                         href={meta.href} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        style={style}
+                        className={fragmentClass}
+                        style={varStyle as React.CSSProperties}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {f.text}
@@ -403,7 +387,7 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
             }
 
             return (
-                <span key={fi} style={style}>
+                <span key={fi} className={fragmentClass} style={varStyle as React.CSSProperties}>
                     {f.text}
                 </span>
             );

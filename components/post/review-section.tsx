@@ -32,7 +32,7 @@ export function ReviewSection({
   };
 
   return (
-    <div style={{ marginTop: "2rem" }}>
+    <div className="mt-8">
       <div className="section-divider">Reviews</div>
 
       <div className="review-highlight-grid">
@@ -44,8 +44,7 @@ export function ReviewSection({
           {[1, 2, 3, 4, 5].map((star) => (
             <span
               key={star}
-              className={`star ${star <= Math.round(avgRating) ? "filled" : ""}`}
-              style={{ cursor: "default" }}
+              className={`star ${star <= Math.round(avgRating) ? "filled" : ""} cursor-default`}
             >
               <Star 
                 size={18} 

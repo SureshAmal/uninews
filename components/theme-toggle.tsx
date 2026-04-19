@@ -49,15 +49,14 @@ export function ThemeToggle() {
     });
   };
 
-  if (!mounted) return <div style={{ width: 36, height: 36 }} />;
+  if (!mounted) return <div className="w-9 h-9" />;
 
   return (
     <button
       onClick={toggle}
-      className="btn btn-icon btn-ghost"
+      className="btn btn-icon btn-ghost theme-toggle-btn"
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-      style={{ position: "relative", overflow: "hidden" }}
     >
       {ripples.map(ripple => (
         <span 
@@ -66,41 +65,13 @@ export function ThemeToggle() {
             style={{
                 left: ripple.x,
                 top: ripple.y,
-                position: "absolute",
-                width: "2px",
-                height: "2px",
-                background: "rgba(255, 255, 255, 0.4)",
-                borderRadius: "50%",
-                transform: "translate(-50%, -50%)",
-                pointerEvents: "none",
-                animation: "ripple 0.6s ease-out"
             }}
         />
       ))}
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s",
-          transform: theme === "light" ? "rotate(0deg)" : "rotate(180deg)",
-          opacity: theme === "light" ? 1 : 0,
-          position: theme === "light" ? "relative" : "absolute",
-        }}
-      >
+      <span className="theme-toggle-icon-wrapper theme-toggle-sun">
         <Sun size={20} />
       </span>
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s",
-          transform: theme === "dark" ? "rotate(0deg)" : "rotate(-180deg)",
-          opacity: theme === "dark" ? 1 : 0,
-          position: theme === "dark" ? "relative" : "absolute",
-        }}
-      >
+      <span className="theme-toggle-icon-wrapper theme-toggle-moon">
         <Moon size={20} />
       </span>
     </button>

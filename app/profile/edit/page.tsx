@@ -19,23 +19,8 @@ export default async function EditProfilePage() {
   if (!user) return <div>User not found</div>;
 
   return (
-    <div
-      className="container-news animate-fade-in"
-      style={{
-        paddingTop: "2rem",
-        paddingBottom: "4rem",
-        maxWidth: 540,
-        margin: "0 auto",
-      }}
-    >
-      <h1
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "2rem",
-          fontWeight: 700,
-          marginBottom: "2rem",
-        }}
-      >
+    <div className="container-news animate-fade-in pt-8 pb-16 max-w-[540px] mx-auto">
+      <h1 className="font-heading text-[2rem] font-bold mb-8">
         Edit Profile
       </h1>
 

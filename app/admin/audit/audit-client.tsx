@@ -86,8 +86,7 @@ export function AdminAuditClient({ data, search, page }: any) {
               <Link
                 key={i}
                 href={`?${current.toString()}`}
-                className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
-                style={{ width: 36, padding: 0, justifyContent: "center", display: "flex", alignItems: "center" }}
+                className={`btn btn-sm w-9 p-0 flex items-center justify-center ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
               >
                 {i + 1}
               </Link>

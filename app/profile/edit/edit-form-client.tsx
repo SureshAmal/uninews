@@ -54,44 +54,27 @@ export function EditForm({ user }: EditFormProps) {
     <div>
       <BackButton />
       <form action={handleSubmit}>
-        <div style={{ display: "grid", gap: "1.25rem" }}>
+        <div className="grid gap-5 mt-6">
           {/* Avatar */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div
-              className="avatar avatar-xl"
-              style={{
-                border: "2px solid var(--border-color)",
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                background: "var(--bg-tertiary)",
-              }}
-            >
+          <div className="flex items-center gap-4">
+            <div className="avatar avatar-xl border-2 border-divider cursor-pointer relative overflow-hidden bg-bg-tertiary">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
+                  className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <Camera size={32} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", color: "var(--text-tertiary)" }} />
+                <Camera size={32} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-tertiary" />
               )}
             </div>
             <div>
-              <label
-                className="btn btn-secondary btn-sm"
-                style={{ cursor: "pointer" }}
-              >
+              <label className="btn btn-secondary btn-sm cursor-pointer">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarUpload}
-                  style={{ display: "none" }}
+                  className="hidden"
                 />
                 {uploading ? "Uploading..." : "Change Avatar"}
               </label>
@@ -121,35 +104,23 @@ export function EditForm({ user }: EditFormProps) {
             <textarea
               id="bio"
               name="bio"
-              className="input"
+              className="input min-h-[100px]"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell people about yourself..."
-              style={{ minHeight: 100 }}
             />
           </div>
 
           <button
             type="submit"
-            className="btn btn-primary btn-lg"
+            className="btn btn-primary btn-lg w-full mt-2"
             disabled={isPending}
-            style={{ width: "100%" }}
           >
             {isPending ? "Saving..." : "Save Changes"}
           </button>
 
           {saved && (
-            <p
-              style={{
-                fontSize: "0.875rem",
-                color: "var(--success)",
-                textAlign: "center",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.375rem"
-              }}
-            >
+            <p className="text-[0.875rem] text-success text-center flex items-center justify-center gap-1.5">
               <CheckCircle size={16} /> Profile updated!
             </p>
           )}

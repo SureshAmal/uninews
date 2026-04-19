@@ -75,29 +75,19 @@ export const ResizableImage = Node.create({
 
       return (
         <NodeViewWrapper
-          className={`image-resizer-wrapper align-${align}`}
+          className={`image-resizer-wrapper align-${align} relative z-[1] ${
+            align === "inline" 
+              ? "inline-block align-middle mx-2" 
+              : `block align-top ${align === "center" ? "flex flex-col items-center my-8 mx-auto w-full" : `float-${align} ${align === "left" ? "my-2 mr-8 mb-4 ml-0" : "my-2 ml-8 mb-4 mr-0"} w-auto`}`
+          }`}
           contentEditable={false}
           draggable="true"
           data-drag-handle=""
-          style={
-            align === "inline"
-              ? { display: "inline-block", verticalAlign: "middle", margin: "0 0.5rem", position: "relative", zIndex: 1 }
-              : {
-                  display: align === "center" ? "flex" : "block",
-                  verticalAlign: "top",
-                  float: align === "center" ? "none" : align,
-                  margin: align === "center" ? "2rem auto" : align === "left" ? "0.5rem 2rem 1rem 0" : "0.5rem 0 1rem 2rem",
-                  width: align === "center" ? "100%" : "auto",
-                  maxWidth: "100%",
-                  position: "relative",
-                  zIndex: 1
-                }
-          }
         >
-          <div style={{ position: "relative", width: width, maxWidth: "100%" }}>
+          <div className="relative max-w-full" style={{ width }}>
             <img
               src={src}
-              style={{ width: "100%", height: "auto", borderRadius: "12px", display: "block" }}
+              className="editor-image-base"
               alt=""
             />
 
@@ -105,31 +95,9 @@ export const ResizableImage = Node.create({
             <div
               onMouseDown={handleResize}
               onTouchStart={handleResize}
-              className="resize-handle"
-              style={{
-                position: "absolute",
-                bottom: -10, // Larger hit area
-                right: -10,  // Larger hit area
-                width: 44,   // 44px is standard touch target
-                height: 44,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "nwse-resize",
-                zIndex: 10,
-                background: "transparent"
-              }}
+              className="resize-handle-outer"
             >
-              <div style={{
-                width: 24,
-                height: 24,
-                background: "white",
-                borderRadius: "50%",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
+              <div className="resize-handle-inner">
                 <Maximize2 size={12} color="#1a1a1a" />
               </div>
             </div>
@@ -141,13 +109,13 @@ export const ResizableImage = Node.create({
               <button type="button" title="Align Right" onClick={() => updateAttributes({ align: "right" })} className={align === "right" ? "active" : ""}><AlignRight size={14} /></button>
               <button type="button" title="Inline" onClick={() => updateAttributes({ align: "inline" })} className={align === "inline" ? "active" : ""}><Type size={14} /></button>
               
-              <div style={{ width: 1, height: 14, background: "rgba(255,255,255,0.2)", margin: "0 4px" }} />
+              <div className="extension-divider-v" />
               
               <button 
                 type="button" 
                 title="Delete Image" 
                 onClick={() => deleteNode()}
-                style={{ color: "#ff4d4d" }}
+                className="text-error-extension"
               >
                 <Trash2 size={14} />
               </button>

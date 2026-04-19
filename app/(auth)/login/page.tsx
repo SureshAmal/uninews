@@ -15,45 +15,22 @@ export default function LoginPage() {
 
   return (
     <>
-      <h2
-        style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: "1.5rem",
-          fontWeight: 700,
-          marginBottom: "0.25rem",
-        }}
-      >
+      <h2 className="auth-header">
         Welcome back
       </h2>
-      <p
-        style={{
-          fontSize: "0.875rem",
-          color: "var(--text-tertiary)",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <p className="auth-subtext">
         Log in to post news and connect
       </p>
 
       {state?.error && (
-        <div
-          style={{
-            padding: "0.75rem 1rem",
-            background: "rgba(196,30,58,0.08)",
-            border: "1px solid rgba(196,30,58,0.2)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--error)",
-            fontSize: "0.8125rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="auth-error-banner">
           {state.error}
         </div>
       )}
 
       <form action={formAction}>
         <input type="hidden" name="redirectTo" value={redirectTo} />
-        <div className="input-group" style={{ marginBottom: "1rem" }}>
+        <div className="input-group mb-4">
           <label htmlFor="username" className="input-label">
             Username
           </label>
@@ -71,7 +48,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        <div className="input-group" style={{ marginBottom: "1.5rem" }}>
+        <div className="input-group mb-6">
           <label htmlFor="password" className="input-label">
             Password
           </label>
@@ -91,26 +68,18 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="btn btn-primary btn-lg"
+          className="btn btn-primary btn-lg w-full"
           disabled={isPending}
-          style={{ width: "100%" }}
         >
           {isPending ? "Logging in..." : "Log in"}
         </button>
       </form>
 
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: "0.8125rem",
-          color: "var(--text-tertiary)",
-          marginTop: "1.5rem",
-        }}
-      >
+      <p className="auth-footer-text">
         Don&apos;t have an account?{" "}
         <Link
           href="/signup"
-          style={{ color: "var(--accent-text)", fontWeight: 500 }}
+          className="auth-footer-link"
         >
           Sign up
         </Link>

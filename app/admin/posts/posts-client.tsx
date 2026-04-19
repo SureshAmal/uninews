@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Search, Eye, Filter, EyeOff, Trash2, MoreVertical, Star, ChevronUp, ChevronDown } from "lucide-react";
-import { togglePostStatus, adminDeletePost, adminToggleFeatured } from "@/app/actions/admin";
+import { adminToggleFeatured, setPostStatusAdmin, togglePostStatus, adminDeletePost } from "@/app/actions/admin";
 import { PostPreviewModal } from "./preview-modal";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/components/ui/toast";
@@ -120,10 +120,9 @@ export function AdminPostsClient({ data, authors, tags, search, category, status
         </select>
 
         <select 
-            className="jira-filter-btn" 
+            className="jira-filter-btn max-w-[200px]" 
             value={authorId} 
             onChange={(e) => updateFilters("authorId", e.target.value)}
-            style={{ maxWidth: "200px" }}
         >
           <option value="all">Author: All</option>
           {authors.map((u: any) => (
@@ -134,10 +133,9 @@ export function AdminPostsClient({ data, authors, tags, search, category, status
         </select>
 
         <select 
-            className="jira-filter-btn" 
+            className="jira-filter-btn max-w-[150px]" 
             value={tag} 
             onChange={(e) => updateFilters("tag", e.target.value)}
-            style={{ maxWidth: "150px" }}
         >
           <option value="all">Tag: All</option>
           {tags.map((t: string) => (
@@ -153,7 +151,7 @@ export function AdminPostsClient({ data, authors, tags, search, category, status
         <div className="admin-bulk-bar">
           <span className="admin-bulk-text">{selectedPosts.size} posts selected</span>
           <div className="flex gap-2">
-            <button onClick={handleBulkDelete} className="btn btn-sm btn-ghost" style={{ background: "rgba(196,30,58,0.1)", color: "var(--error)" }}>
+            <button onClick={handleBulkDelete} className="btn btn-sm btn-ghost bg-red-900/10 text-[var(--error)]">
               <Trash2 size={12} className="mr-1" /> Bulk Delete
             </button>
           </div>
@@ -247,8 +245,7 @@ export function AdminPostsClient({ data, authors, tags, search, category, status
               <Link
                 key={i}
                 href={`?${current.toString()}`}
-                className={`btn btn-sm ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
-                style={{ width: 36, padding: 0, justifyContent: "center", display: "flex", alignItems: "center" }}
+                className={`btn btn-sm w-9 p-0 flex items-center justify-center ${page === i + 1 ? "btn-primary" : "btn-ghost"}`}
               >
                 {i + 1}
               </Link>
@@ -262,28 +259,61 @@ export function AdminPostsClient({ data, authors, tags, search, category, status
   );
 }
 
+import { Anchor } from "lucide-react";
+
 function InlinePostStatus({ post }: { post: any }) {
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
   const curr = post.isFlagged ? "flagged" : post.isPublished ? "published" : "draft";
 
-  const handleInlineChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!confirm("Confirm status switch?")) return;
+  const handleStatusUpdate = async (val: "published" | "draft" | "flagged") => {
+    if (val === curr) {
+      setIsOpen(false);
+      return;
+    }
+    
+    if (!confirm("Confirm status change?")) {
+      setIsOpen(false);
+      return;
+    }
+    
     setLoading(true);
-    await togglePostStatus(post.id);
+    setIsOpen(false);
+    const res = await setPostStatusAdmin(post.id, val);
+    if (!res.success) {
+      // toast error handled in action or here
+    }
     setLoading(false);
   };
 
   const statusClass = curr === "flagged" ? "status-flagged" : curr === "published" ? "status-published" : "status-draft";
+  
   if (loading) return <span className="text-[0.7rem] text-tertiary">Saving...</span>;
 
   return (
-    <div className="admin-status-wrapper">
-      <select value={curr} onChange={handleInlineChange} className={`admin-status-select ${statusClass}`}>
-        <option value="draft" disabled>DRAFT</option>
-        <option value="published">PUBLISHED</option>
-        <option value="flagged">FLAGGED</option>
-      </select>
-      <span className="admin-status-arrow">▼</span>
+    <div className="admin-status-dropdown">
+      <div 
+        className={`admin-status-display ${statusClass}`} 
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="flex items-center gap-1.5">
+          <Anchor size={12} className="opacity-50" />
+          <span>{curr.toUpperCase()}</span>
+        </div>
+        <span className="text-[10px] ml-2">▼</span>
+      </div>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="admin-status-menu">
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("published")}>PUBLISHED</button>
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("draft")}>DRAFT</button>
+            <button className="admin-status-menu-item" onClick={() => handleStatusUpdate("flagged")}>FLAGGED</button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

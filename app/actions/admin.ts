@@ -330,6 +330,24 @@ export async function getUniqueTagsSummary() {
   return items.map((r: any) => r.tag as string).filter(Boolean).sort();
 }
 
+export async function setPostStatusAdmin(postId: string, status: "published" | "draft" | "flagged") {
+  const admin = await requireAdmin();
+  const [target] = await db.select().from(posts).where(eq(posts.id, postId)).limit(1);
+  if (!target) return { error: "Post not found." };
+
+  const isPublished = status === "published";
+  const isFlagged = status === "flagged";
+
+  await db
+    .update(posts)
+    .set({ isPublished, isFlagged })
+    .where(eq(posts.id, postId));
+
+  revalidatePath("/admin/posts");
+  await logAdminAction(admin.userId, "SET_POST_STATUS", postId, `Set post status to ${status}`);
+  return { success: true, error: undefined };
+}
+
 /** Toggles isPublished and isFlagged */
 export async function togglePostStatus(postId: string) {
   await requireAdmin();
