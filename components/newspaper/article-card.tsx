@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "motion/react";
 import Link from "next/link";
 import type { RankedPost } from "@/lib/feed/ranking";
 import { Eye, Heart, Repeat2 } from "lucide-react";
@@ -21,14 +24,19 @@ export function ArticleCard({
   if (size === "hero") {
     return (
       <Link href={`/post/${post.id}`} className="article-card-link">
-        <article className={`card article-card-hero ${hasImage ? "has-image" : ""}`}>
+        <motion.article 
+          className={`card article-card-hero ${hasImage ? "has-image" : ""}`}
+          whileHover={{ scale: 0.99, translateY: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+        >
           {hasImage && (
             <div
-              className="article-card-image-hero"
+              className="article-card-image-hero w-full h-full absolute inset-0 transition-transform duration-700 ease-out z-[0] group-hover:scale-105"
               style={{ backgroundImage: `url(${post.coverImageUrl})` }}
             />
           )}
-          <div className="article-card-body-hero">
+          <div className="article-card-body-hero relative z-10">
             <div className="flex items-center gap-3 mb-3">
               <span className={`badge ${getCategoryClass(post.category)}`}>{post.category}</span>
               <span className="text-[0.75rem] text-[var(--text-tertiary)]">
@@ -57,7 +65,7 @@ export function ArticleCard({
               <span className="flex items-center gap-1"><Heart size={14} /> {post.likeCount}</span>
             </div>
           </div>
-        </article>
+        </motion.article>
       </Link>
     );
   }
@@ -65,7 +73,12 @@ export function ArticleCard({
   if (size === "large") {
     return (
       <Link href={`/post/${post.id}`} className="article-card-link">
-        <article className="card column-break-avoid">
+        <motion.article 
+          className="card column-break-avoid"
+          whileHover={{ scale: 0.99, translateY: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+        >
           {hasImage && (
             <div
               className="article-card-image-standard"
@@ -95,7 +108,7 @@ export function ArticleCard({
               <span className="flex items-center gap-1"><Repeat2 size={14} /> {post.repostCount}</span>
             </div>
           </div>
-        </article>
+        </motion.article>
       </Link>
     );
   }
@@ -103,7 +116,11 @@ export function ArticleCard({
   if (size === "compact") {
     return (
       <Link href={`/post/${post.id}`} className="article-card-link">
-        <article className="article-card-compact">
+        <motion.article 
+          className="article-card-compact"
+          whileHover={{ backgroundColor: "var(--accent-hover)" }}
+          whileTap={{ scale: 0.98 }}
+        >
           {hasImage && (
             <div
               className="article-card-image-compact"
@@ -119,22 +136,29 @@ export function ArticleCard({
               <span className="flex items-center gap-1"><Eye size={12} /> {post.viewCount}</span>
             </div>
           </div>
-        </article>
+        </motion.article>
       </Link>
     );
   }
 
   // Default: medium
   return (
-    <Link href={`/post/${post.id}`} className="article-card-link">
-      <article className="card column-break-avoid">
+    <Link href={`/post/${post.id}`} className="article-card-link group">
+      <motion.article 
+        className="card column-break-avoid h-full transition-shadow duration-300 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+        whileHover={{ scale: 0.99, translateY: -2 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
+      >
         {hasImage && (
-          <div
-            className="article-card-image-standard"
-            style={{ backgroundImage: `url(${post.coverImageUrl})` } as React.CSSProperties}
-          />
+          <div className="overflow-hidden bg-[var(--bg-secondary)] relative">
+            <div
+              className="article-card-image-standard transition-transform duration-700 ease-out group-hover:scale-105"
+              style={{ backgroundImage: `url(${post.coverImageUrl})` } as React.CSSProperties}
+            />
+          </div>
         )}
-        <div className="p-4">
+        <div className="p-4 relative z-10 bg-inherit">
           <div className="flex items-center gap-2 mb-1.5">
             <span className={`badge ${getCategoryClass(post.category)}`}>{post.category}</span>
           </div>
@@ -152,7 +176,7 @@ export function ArticleCard({
             <span>{timeAgo(post.createdAt)}</span>
           </div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }

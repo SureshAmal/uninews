@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toggleLike, toggleSave, toggleRepost } from "@/app/actions/posts";
 import { Heart, Repeat2, Bookmark, Eye } from "lucide-react";
+import { motion } from "motion/react";
 
 interface EngagementBarProps {
   postId: string;
@@ -67,34 +68,59 @@ export function EngagementBar({
 
   return (
     <div className="engagement-bar-container">
-      <button
+      <motion.button
         onClick={handleLike}
         className={`engagement-btn ${liked ? "active" : ""}`}
         disabled={isPending}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.85 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        <span className={liked ? "animate-heart" : ""} key={String(liked)}>
+        <motion.span 
+          initial={false}
+          animate={{ scale: liked ? [1, 1.3, 1] : 1 }}
+          transition={{ duration: 0.4, type: "tween", ease: "backOut" }}
+        >
           <Heart size={20} fill={liked ? "currentColor" : "none"} />
-        </span>
+        </motion.span>
         <span>{likes}</span>
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
         onClick={handleRepost}
         className={`engagement-btn ${reposted ? "active" : ""}`}
         disabled={isPending}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.85 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        <span><Repeat2 size={20} /></span>
+        <motion.span
+          initial={false}
+          animate={{ rotate: reposted ? [0, 180, 360] : 0, scale: reposted ? [1, 1.2, 1] : 1 }}
+          transition={{ duration: 0.5, type: "tween", ease: "easeInOut" }}
+        >
+          <Repeat2 size={20} />
+        </motion.span>
         <span>{reps}</span>
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
         onClick={handleSave}
         className={`engagement-btn ${saved ? "active" : ""}`}
         disabled={isPending}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.85 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        <span><Bookmark size={20} fill={saved ? "currentColor" : "none"} /></span>
+        <motion.span
+          initial={false}
+          animate={{ scale: saved ? [1, 1.2, 1] : 1, y: saved ? [0, -3, 0] : 0 }}
+          transition={{ duration: 0.4, type: "tween", ease: "backOut" }}
+        >
+          <Bookmark size={20} fill={saved ? "currentColor" : "none"} />
+        </motion.span>
         <span>{saves}</span>
-      </button>
+      </motion.button>
 
       <div className="flex-1" />
 

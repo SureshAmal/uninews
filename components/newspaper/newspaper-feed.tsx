@@ -10,13 +10,15 @@ import { stripHtml } from "@/lib/utils";
 import { Trash2, Edit2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 
+import { motion } from "motion/react";
+
 // Configuration for the broadsheet grid
 const ROW_HEIGHT = 5; // 5px row slices for fine-grained packing
 const GAP_PX = 40; // 2.5rem
 const COL_COUNT = 12;
 
 // Helper component for each article to auto-correct its height perfectly.
-function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
+function FeedArticle({ post, currentUser, index }: { post: any, currentUser: any, index: number }) {
   const innerRef = useRef<HTMLDivElement>(null);
   // Just use post.rowSpan exactly to avoid jitter and ensure tight dense packing
   const actualRowSpan = post.rowSpan;
@@ -33,12 +35,20 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
   const isAdmin = currentUser?.isAdmin;
 
   return (
-    <article 
-      className="feed-article animate-fade-in"
+    <motion.article 
+      className="feed-article"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: isDeleting ? 0.5 : 1, y: 0 }}
+      transition={{ 
+        type: "spring", 
+        bounce: 0.2, 
+        duration: 0.6,
+        delay: index * 0.05 
+      }}
+      whileTap={{ scale: 0.98 }}
       style={{ 
         gridColumn: `span ${post.colSpan}`,
         gridRow: `span ${actualRowSpan}`,
-        opacity: isDeleting ? 0.5 : 1,
         pointerEvents: isDeleting ? "none" : "auto"
       }}
     >
@@ -58,10 +68,13 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
         {post.coverImageUrl && (
           <div className="feed-image-container" style={{ height: post.imageHeight }}>
             <Link href={`/post/${post.id}`}>
-              <img 
+              <motion.img 
                 src={post.coverImageUrl} 
                 alt={post.title} 
                 className="feed-image"
+                initial={{ filter: "brightness(0.8)", opacity: 0 }}
+                animate={{ filter: "brightness(1)", opacity: 1 }}
+                transition={{ duration: 0.4 }}
               />
             </Link>
           </div>
@@ -85,7 +98,7 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
                 <Link 
                   key={tag} 
                   href={`/tag/${tag}`}
-                  className="feed-tag-pill tag-pill-hover"
+                  className="feed-tag-pill"
                 >
                   #{tag}
                 </Link>
@@ -94,7 +107,7 @@ function FeedArticle({ post, currentUser }: { post: any, currentUser: any }) {
           )}
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -313,8 +326,8 @@ export function NewspaperFeed({ initialPosts, currentUser, tagFilter, isSimplifi
           alignItems: "stretch" 
         }}
       >
-        {postsWithMetrics.map((post) => (
-          <FeedArticle key={post.id} post={post} currentUser={currentUser} />
+        {postsWithMetrics.map((post, index) => (
+          <FeedArticle key={post.id} post={post} currentUser={currentUser} index={index} />
         ))}
       </div>
 

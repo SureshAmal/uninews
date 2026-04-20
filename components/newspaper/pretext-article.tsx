@@ -2,6 +2,7 @@
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { prepareRichInline, materializeRichInlineLineRange } from "@chenglou/pretext/rich-inline";
+import { motion } from "motion/react";
 
 interface PretextArticleProps {
   content: string;
@@ -432,7 +433,15 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
             "--h": `${obs.height}px`,
           } as React.CSSProperties}
         >
-          <img src={obs.src} className="pretext-obstacle-img" alt="Illustration" />
+          <motion.img 
+            src={obs.src} 
+            className="pretext-obstacle-img" 
+            alt="Illustration" 
+            initial={{ opacity: 0, filter: "brightness(0.9)" }}
+            whileInView={{ opacity: 1, filter: "brightness(1)" }}
+            viewport={{ once: true, margin: "200px" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
         </div>
       ))}
 
@@ -475,7 +484,15 @@ export function PretextArticle({ content, columnCount = 2 }: PretextArticleProps
                   className="pretext-fragment-img-wrapper"
                   style={{ ...varStyle, "--w": `${meta.width}px` } as React.CSSProperties}
                 >
-                  <img src={meta.src} className="pretext-fragment-img" alt="Inline" />
+                  <motion.img 
+                    src={meta.src} 
+                    className="pretext-fragment-img" 
+                    alt="Inline" 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ type: "spring", bounce: 0.4, duration: 0.6 }}
+                  />
                 </span>
               );
             }

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "micro-interactions": {
+      "source": "dylantarre/animation-principles",
+      "sourceType": "github",
+      "computedHash": "22a154d2e1a33e32f2946504502849dba5a934ac3654ba625a5807b836272955"
+    }
+  }
+}

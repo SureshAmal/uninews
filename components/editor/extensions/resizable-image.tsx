@@ -43,8 +43,11 @@ export const ResizableImage = Node.create({
       const { src, width, align } = node.attrs;
 
       const handleResize = (e: React.MouseEvent | React.TouchEvent) => {
-        if (e.cancelable) e.preventDefault();
-        const startX = 'touches' in e ? e.touches[0].pageX : e.pageX;
+        // Prevent default only for touch events to avoid scrolling while resizing
+        if (e.cancelable && e.type.startsWith('touch')) {
+          e.preventDefault();
+        }
+        const startX = 'touches' in e ? e.touches[0].pageX : (e as React.MouseEvent).pageX;
         const startWidth = parseInt(String(width)) || 400;
         
         // Get container width
@@ -61,16 +64,18 @@ export const ResizableImage = Node.create({
         };
 
         const onEnd = () => {
-          document.removeEventListener("mousemove", onMove as any);
+          document.removeEventListener("mousemove", onMove as EventListener);
           document.removeEventListener("mouseup", onEnd);
-          document.removeEventListener("touchmove", onMove as any);
+          document.removeEventListener("touchmove", onMove as EventListener);
           document.removeEventListener("touchend", onEnd);
+          document.removeEventListener("touchcancel", onEnd);
         };
 
-        document.addEventListener("mousemove", onMove as any);
+        document.addEventListener("mousemove", onMove as EventListener);
         document.addEventListener("mouseup", onEnd);
-        document.addEventListener("touchmove", onMove as any, { passive: false });
+        document.addEventListener("touchmove", onMove as EventListener, { passive: false });
         document.addEventListener("touchend", onEnd);
+        document.addEventListener("touchcancel", onEnd);
       };
 
       return (
@@ -95,7 +100,8 @@ export const ResizableImage = Node.create({
             <div
               onMouseDown={handleResize}
               onTouchStart={handleResize}
-              className="resize-handle-outer"
+              className="resize-handle-outer style-touch-action-none"
+              style={{ touchAction: "none" }}
             >
               <div className="resize-handle-inner">
                 <Maximize2 size={12} color="#1a1a1a" />

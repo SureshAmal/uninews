@@ -25,9 +25,11 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Loader2,
   Maximize2
 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { uploadFile } from "@/app/actions/upload";
 import { toast } from "@/components/ui/toast";
 
@@ -145,13 +147,21 @@ export function DirectPreviewEditor({
 
   return (
     <div className="direct-editor-container animate-fade-in">
-      {/* Uploading Indicator */}
-      {isUploading && (
-        <div className="editor-upload-indicator">
-          <div className="spinner-sm" />
-          Uploading image...
-        </div>
-      )}
+      {/* Uploading Indicator Overlay */}
+      <AnimatePresence>
+        {isUploading && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            transition={{ type: "spring", bounce: 0.4 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-bg-primary shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-divider rounded-full px-5 py-3 flex items-center gap-3 font-medium min-w-[200px] justify-center"
+          >
+            <Loader2 className="animate-spin text-accent" size={20} />
+            Uploading image...
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Toolbar */}
       <div className="editor-sticky-toolbar">
@@ -303,6 +313,8 @@ export function DirectPreviewEditor({
       {/* Bubble Menu for Selections - Only show for text, not images/stickers */}
       <BubbleMenu
         editor={editor}
+        // @ts-expect-error - tippyOptions is passed to the underlying tippy.js instance
+        tippyOptions={{ duration: 100, zIndex: 9999, offset: [0, 8] }}
         shouldShow={({ editor, from, to }) => {
           // Don't show for images or stickers
           if (editor.isActive("resizableImage") || editor.isActive("sticker")) return false;
