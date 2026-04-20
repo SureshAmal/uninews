@@ -1,8 +1,10 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, PenLine, User, KeyRound, UserPlus, Bookmark, Shield } from "lucide-react";
+import { motion } from "motion/react";
 
 interface NavUser {
   userId: string;
@@ -57,7 +59,7 @@ function NavItem({
   active?: boolean;
 }) {
   const className = `mobile-nav-item ${active ? "mobile-nav-item-active" : ""} ${accent ? "mobile-nav-accent" : ""}`;
-  
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // If the tab is already active, prevent Next.js from processing a redundant navigation.
     // Instead, just perform a standard mobile app "scroll to top" action.
@@ -69,7 +71,27 @@ function NavItem({
 
   return (
     <Link href={href} className={className} onClick={handleClick}>
-      <span>{icon}</span>
+      <motion.div
+        className="active:scale-90 transition-transform"
+        initial={{ scale: 1 }}
+        animate={{
+          scale: active ? 1.15 : 1,
+          y: active ? -2 : 0
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 20
+        }}
+      >
+        {React.cloneElement(icon as React.ReactElement<any>, {
+          style: {
+            fill: active ? "currentColor" : "none",
+            transition: "fill 0.2s ease-out"
+          },
+          strokeWidth: active || accent ? 2.5 : 2,
+        })}
+      </motion.div>
       {!accent && (
         <span className={`mobile-nav-label ${active ? "mobile-nav-label-active" : ""}`}>
           {label}
