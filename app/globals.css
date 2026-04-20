@@ -3337,7 +3337,9 @@ html {
 .image-alignment-toolbar,
 .sticker-toolbar {
   position: absolute;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 4px;
   border-radius: 8px;
   display: flex;
@@ -3346,6 +3348,41 @@ html {
   visibility: hidden;
   transition: opacity 0.2s;
   z-index: 50;
+}
+
+.image-alignment-toolbar button,
+.sticker-toolbar button {
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.image-alignment-toolbar button:hover,
+.sticker-toolbar button:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.image-alignment-toolbar button.active,
+.sticker-toolbar button.active {
+  background: var(--bg-tertiary);
+  color: var(--accent);
+}
+
+.image-alignment-toolbar button.text-error-extension {
+  color: var(--error);
+}
+
+.image-alignment-toolbar button.text-error-extension:hover {
+  background: rgba(var(--error-rgb, 239, 68, 68), 0.1);
+  color: var(--error);
 }
 
 /* ─── Print Utilities ────────────────────────────────────────── */

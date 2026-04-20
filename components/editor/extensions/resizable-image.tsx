@@ -17,6 +17,8 @@ export const ResizableImage = Node.create({
       width: { default: "300px" },
       height: { default: "auto" },
       align: { default: "inline" }, // left, center, right, inline
+      id: { default: null },
+      isLoading: { default: false },
     };
   },
 
@@ -40,7 +42,7 @@ export const ResizableImage = Node.create({
 
   addNodeView() {
     return ReactNodeViewRenderer(({ node, updateAttributes, deleteNode, editor }) => {
-      const { src, width, align } = node.attrs;
+      const { src, width, align, isLoading } = node.attrs;
 
       const handleResize = (e: React.MouseEvent | React.TouchEvent) => {
         // Prevent default only for touch events to avoid scrolling while resizing
@@ -92,9 +94,17 @@ export const ResizableImage = Node.create({
           <div className="relative max-w-full" style={{ width }}>
             <img
               src={src}
-              className="editor-image-base"
+              className={`editor-image-base ${isLoading ? "opacity-50 blur-[2px] grayscale-[50%] transition-all duration-500" : "transition-all duration-500"}`}
               alt=""
             />
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl backdrop-blur-[1px] rounded-[12px] z-[2]">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="w-8 h-8 rounded-full border-4 border-white/20 border-t-white animate-spin shadow-sm"></div>
+                  <span className="text-white text-xs font-bold drop-shadow-md tracking-wide uppercase">UPLOADING</span>
+                </div>
+              </div>
+            )}
 
             {/* Resize Handles */}
             <div

@@ -50,13 +50,17 @@ export function EditPostForm({ post }: EditPostFormProps) {
     }
 
     startUpload(async () => {
-      const formData = new FormData();
-      formData.set("file", file);
-      const result = await uploadFile(formData);
-      if (result.url) {
-        setCoverImage(result.url);
-      } else if (result.error) {
-        toast.error("Upload failed", result.error);
+      try {
+        const formData = new FormData();
+        formData.set("file", file);
+        const result = await uploadFile(formData);
+        if (result.url) {
+          setCoverImage(result.url);
+        } else if (result.error) {
+          toast.error("Upload failed", result.error);
+        }
+      } catch (err) {
+        toast.error("Upload failed", "File may be too large or server errored.");
       }
     });
   };

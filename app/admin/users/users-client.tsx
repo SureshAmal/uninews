@@ -302,16 +302,21 @@ export function AdminUsersClient({ data, search, role, status, page, sortBy, sor
                     if (!file) return;
                     
                     setUploading(true);
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    const res = await uploadFile(formData);
-                    setUploading(false);
-                    
-                    if (res?.url) {
-                      setEditingUser({ ...editingUser, avatarUrl: res.url });
-                      toast.success("Uploaded", "New avatar ready to save.");
-                    } else if (res?.error) {
-                      toast.error("Upload Failed", res.error);
+                    try {
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      const res = await uploadFile(formData);
+                      
+                      if (res?.url) {
+                        setEditingUser({ ...editingUser, avatarUrl: res.url });
+                        toast.success("Uploaded", "New avatar ready to save.");
+                      } else if (res?.error) {
+                        toast.error("Upload Failed", res.error);
+                      }
+                    } catch (err) {
+                      toast.error("Upload Failed", "File may be too large or server errored.");
+                    } finally {
+                      setUploading(false);
                     }
                   }}
                 />

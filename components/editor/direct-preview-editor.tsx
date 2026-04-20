@@ -81,17 +81,84 @@ export function DirectPreviewEditor({
       return;
     }
 
+    const localUrl = URL.createObjectURL(file);
+    const uploadId = `upload-${Date.now()}`;
+
+    // Insert placeholder immediately with loading state
+    editor?.chain().focus().insertContent({
+      type: "resizableImage",
+      attrs: { src: localUrl, id: uploadId, isLoading: true }
+    }).run();
+
     startUpload(async () => {
-      const formData = new FormData();
-      formData.set("file", file);
-      const result = await uploadFile(formData);
-      if (result.url) {
-        editor?.chain().focus().insertContent({
-          type: "resizableImage",
-          attrs: { src: result.url }
-        }).run();
-      } else {
-        toast.error("Upload failed", result.error || "Could not upload image");
+      try {
+        const formData = new FormData();
+        formData.set("file", file);
+        const result = await uploadFile(formData);
+        
+        if (result.url) {
+          // Replace placeholder with final image URL
+          editor?.commands.command(({ tr }) => {
+            let posToUpdate: number | null = null;
+            let nodeAttrs: Record<string, any> | null = null;
+            
+            editor.state.doc.descendants((node, pos) => {
+              if (node.type.name === 'resizableImage' && node.attrs.id === uploadId) {
+                posToUpdate = pos;
+                nodeAttrs = node.attrs;
+              }
+            });
+
+            if (posToUpdate !== null && nodeAttrs) {
+              tr.setNodeMarkup(posToUpdate, null, {
+                ...(nodeAttrs as any),
+                src: result.url,
+                isLoading: false,
+                id: null
+              });
+            }
+            return true;
+          });
+        } else {
+          // Remove placeholder if upload fails
+          editor?.commands.command(({ tr }) => {
+            let posToDelete: number | null = null;
+            let nodeSize = 0;
+            
+            editor.state.doc.descendants((node, pos) => {
+              if (node.type.name === 'resizableImage' && node.attrs.id === uploadId) {
+                posToDelete = pos;
+                nodeSize = node.nodeSize;
+              }
+            });
+            
+            if (posToDelete !== null) {
+              tr.delete(posToDelete, posToDelete + nodeSize);
+            }
+            return true;
+          });
+          toast.error("Upload failed", result.error || "Could not upload image");
+        }
+      } catch (err) {
+        editor?.commands.command(({ tr }) => {
+          let posToDelete: number | null = null;
+          let nodeSize = 0;
+          
+          editor.state.doc.descendants((node, pos) => {
+            if (node.type.name === 'resizableImage' && node.attrs.id === uploadId) {
+              posToDelete = pos;
+              nodeSize = node.nodeSize;
+            }
+          });
+          
+          if (posToDelete !== null) {
+            tr.delete(posToDelete, posToDelete + nodeSize);
+          }
+          return true;
+        });
+        toast.error("Upload failed", "File may be too large or server errored.");
+      } finally {
+        URL.revokeObjectURL(localUrl);
       }
     });
   };
